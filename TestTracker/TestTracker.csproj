@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Tracker\Tracker\Tracker.csproj" />
+    <PackageReference Include="IsatolTracker" Version="1.0.0" />
   </ItemGroup>
 
 </Project>
