@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>IsatolTracker</PackageId>
+    <Authors>Isaías Orozco Toledo</Authors>
+    <Company>Isaías Orozco Toledo</Company>
+    <Product>IsatolTracker</Product>
+    <Description>Track packages from UPS, Fedex and Estafeta MX.</Description>
+    <RepositoryType>Library</RepositoryType>
+    <PackageTags>PackageTracker Package Tracker Tracking</PackageTags>
+    <PackageReleaseNotes>1.0.0 First release</PackageReleaseNotes>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/Isatol/IsatolTracker</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.24" />
+    <PackageReference Include="ShippingTracking" Version="1.0.4" />
+  </ItemGroup>
+
+</Project>
