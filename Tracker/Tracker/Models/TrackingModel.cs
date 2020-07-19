@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace IsatolTracker.Models
+namespace Isatol.Tracker.Models
 {
     public class TrackingModel
     {
@@ -14,8 +14,9 @@ namespace IsatolTracker.Models
 
     public class TrackingDetails
     {
-        public DateTime Date { get; set; }
+        public DateTime? Date { get; set; }
         public string Event { get; set; }
         public string Messages { get; set; }
-    }
+    }  
+
 }
