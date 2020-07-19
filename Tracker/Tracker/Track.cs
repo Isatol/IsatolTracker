@@ -1,60 +1,82 @@
 ﻿using HtmlAgilityPack;
-using ShippingTrackingUtilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using IsatolTracker.Models;
+using Isatol.Tracker.Models;
+using System.Linq.Expressions;
+using System.Net.Http.Formatting;
+using System.Web;
 
-namespace IsatolTracker
+namespace Isatol.Tracker
 {
     /// <summary>
     /// Contains methods to track packages
     /// </summary>
     public class Track
     {
-        private static readonly HttpClient client = new HttpClient();
+        /// <summary>
+        /// Response language
+        /// </summary>
+        public enum Locale
+        {
+            /// <summary>
+            /// Español México
+            /// </summary>
+            es_MX,
+            /// <summary>
+            /// English US
+            /// </summary>
+            en_US
+        }
+        private readonly HttpClient _httpClient;
+
+        /// <summary>
+        /// Initialize a new instance of the Tracker class to track other packages
+        /// </summary>
+        /// <param name="httpClient"></param>
+        public Track(HttpClient httpClient)
+        {
+            _httpClient = httpClient;
+        }
 
         /// <summary>
         /// Track Fedex packages
         /// </summary>
         /// <param name="trackingNumber">The tracking ID</param>
         /// <returns>Details of the package history</returns>
-        public static IsatolTracker.Models.TrackingModel Fedex(string trackingNumber)
-        {            
-            FedExTracking fedExTracking = new FedExTracking(trackingNumber);            
-            ShippingResult shippingResult = fedExTracking.GetTrackingResult();
-            Models.TrackingModel tracking = new Models.TrackingModel();
-            tracking.TrackingDetails = new List<TrackingDetails>();
-            tracking.Status = shippingResult.Status;
-            if (shippingResult.StatusCode == "ERROR")
+        public TrackingModel Fedex(string trackingNumber)
+        {
+            FedexResponse fedexResponse = Helper.GetFedexResponseAsync(trackingNumber, _httpClient).Result;
+            TrackingModel trackingModel = new TrackingModel();
+            trackingModel.TrackingDetails = new List<TrackingDetails>();
+            if (fedexResponse.TrackPackagesResponse.successful) 
             {
-                return default;
-            }
-            else if (shippingResult.StatusCode == "D")
-            {
-                tracking.Delivered = true;
-                return tracking;
-            }
-            else
-            {
-                if (!string.IsNullOrEmpty(shippingResult.ScheduledDeliveryDate))
+                PackageList fedexPackage = fedexResponse.TrackPackagesResponse.PackageList[0];
+                trackingModel.Status = fedexPackage.KeyStatus;
+                trackingModel.Delivered = fedexPackage.KeyStatusCD == "DL";
+                if (DateTime.TryParse(fedexPackage.displayEstDeliveryDateTime, out DateTime displayEstDeliveryDateTime))
                 {
-                    tracking.EstimateDelivery = Convert.ToDateTime(shippingResult.ScheduledDeliveryDate);
+                    trackingModel.EstimateDelivery = displayEstDeliveryDateTime;
                 }
-                shippingResult.TrackingDetails.ForEach(track => 
+                fedexPackage.ScanEventList.ForEach(package =>
                 {
-                    tracking.TrackingDetails.Add(new Models.TrackingDetails 
+                    DateTime? scanDate = null;
+                    if (package.Date != null && package.Time != null)
                     {
-                        Date = Convert.ToDateTime(track.EventDateTime),
-                        Event = track.Event,
-                        Messages = track.EventAddress
+                        scanDate = package.Date + package.Time;
+                    }
+                    trackingModel.TrackingDetails.Add(new TrackingDetails
+                    {
+                        Date = scanDate,
+                        Event = package.Status,
+                        Messages = package.ScanLocation
                     });
-                });
-                return tracking;
+                });                
             }
+            return trackingModel;
         }
 
         /// <summary>
@@ -62,161 +84,110 @@ namespace IsatolTracker
         /// </summary>
         /// <param name="trackingNumber">The tracking ID</param>
         /// <returns>Details of the package history</returns>
-        public static async  Task<IsatolTracker.Models.TrackingModel> FedexAsync(string trackingNumber)
+        public async Task<TrackingModel> FedexAsync(string trackingNumber) 
         {
-            return await Task.Run(() =>
-            {
-                FedExTracking fedExTracking = new FedExTracking(trackingNumber);
-                ShippingResult shippingResult = fedExTracking.GetTrackingResult();
-                Models.TrackingModel tracking = new Models.TrackingModel();
-                tracking.TrackingDetails = new List<TrackingDetails>();
-                tracking.Status = shippingResult.Status;
-                if (shippingResult.StatusCode == "ERROR")
-                {
-                    return default;
-                }
-                else if (shippingResult.StatusCode == "D")
-                {
-                    tracking.Delivered = true;
-                    return tracking;
-                }
-                else
-                {
-                    if (!string.IsNullOrEmpty(shippingResult.ScheduledDeliveryDate))
-                    {
-                        tracking.EstimateDelivery = Convert.ToDateTime(shippingResult.ScheduledDeliveryDate);
-                    }
-                    shippingResult.TrackingDetails.ForEach(track =>
-                    {
-                        tracking.TrackingDetails.Add(new Models.TrackingDetails
-                        {
-                            Date = Convert.ToDateTime(track.EventDateTime),
-                            Event = track.Event,
-                            Messages = track.EventAddress
-                        });
-                    });
-                    return tracking;
-                }
-            });
-        }
-
-        /// <summary>
-        /// Track UPS packages
-        /// </summary>
-        /// <param name="trackingNumber">The tracking number</param>
-        /// <returns>Details of the package history</returns>
-        public static IsatolTracker.Models.TrackingModel UPS(string trackingNumber)
-        {
-            UPSTracking uPSTracking = new UPSTracking(trackingNumber);
-            Models.TrackingModel tracking = new Models.TrackingModel();
-            tracking.TrackingDetails = new List<TrackingDetails>();
-
-            ShippingResult shippingResult = uPSTracking.GetTrackingResult();
-            tracking.Status = shippingResult.Status;
-            if (shippingResult.StatusCode == "Error")
-            {
-                return default;
-            }
-            else if(shippingResult.StatusCode == "D")
-            {
-                tracking.Delivered = true;                
-                return tracking;
-            }
-            else
-            {
-                if (!string.IsNullOrEmpty(shippingResult.ScheduledDeliveryDate))
-                {
-                    tracking.EstimateDelivery = Convert.ToDateTime(shippingResult.ScheduledDeliveryDate);
-                }                
-                shippingResult.TrackingDetails.ForEach(track =>
-                {
-                    tracking.TrackingDetails.Add(new Models.TrackingDetails
-                    {
-                        Date = Convert.ToDateTime(track.EventDateTime),
-                        Event = track.Event,
-                        Messages = track.EventAddress
-                    });
-                });
-                return tracking;
-            }
-        }
-
-        /// <summary>
-        /// Track UPS packages asynchronously
-        /// </summary>
-        /// <param name="trackingNumber"></param>
-        /// <returns>Details of the package history</returns>
-        public static async Task<IsatolTracker.Models.TrackingModel> UPSAsync(string trackingNumber)
-        {
-            return await Task.Run(() =>
-            {
-                UPSTracking uPSTracking = new UPSTracking(trackingNumber);
-                Models.TrackingModel tracking = new Models.TrackingModel();
-                tracking.TrackingDetails = new List<TrackingDetails>();
-
-                ShippingResult shippingResult = uPSTracking.GetTrackingResult();
-                tracking.Status = shippingResult.Status;
-                if (shippingResult.StatusCode == "Error")
-                {
-                    return default;
-                }
-                else if (shippingResult.StatusCode == "D")
-                {
-                    tracking.Delivered = true;                    
-                    return tracking;
-                }
-                else
-                {
-                    if (!string.IsNullOrEmpty(shippingResult.ScheduledDeliveryDate))
-                    {
-                        tracking.EstimateDelivery = Convert.ToDateTime(shippingResult.ScheduledDeliveryDate);
-                    }
-                    shippingResult.TrackingDetails.ForEach(track =>
-                    {
-                        tracking.TrackingDetails.Add(new Models.TrackingDetails
-                        {
-                            Date = Convert.ToDateTime(track.EventDateTime),
-                            Event = track.Event,
-                            Messages = track.EventAddress
-                        });
-                    });
-                    return tracking;
-                }
-            });
-        }
-
-        /// <summary>
-        /// Track Estafeta packages
-        /// </summary>
-        /// <param name="trackingNumber">The tracking number or guide number</param>
-        /// <returns>Details of the package history</returns>
-        public static Models.TrackingModel Estafeta(string trackingNumber)
-        {
-            Dictionary<string, string> keyValuePairs = new Dictionary<string, string>
-            {
-                { "wayBill", trackingNumber },
-                { "waybillType", trackingNumber.Length == 10 ? "0" : "1" }
-            };
-            FormUrlEncodedContent content = new FormUrlEncodedContent(keyValuePairs);
-            HttpResponseMessage response = client.PostAsync("https://rastreositecorecms.azurewebsites.net/Tracking/searchWayBill/", content).Result;
-            string responseString = response.Content.ReadAsStringAsync().Result;
-            HtmlAgilityPack.HtmlDocument document = new HtmlAgilityPack.HtmlDocument();
-            document.LoadHtml(responseString);
+            FedexResponse fedexResponse = await Helper.GetFedexResponseAsync(trackingNumber, _httpClient);
             TrackingModel trackingModel = new TrackingModel();
             trackingModel.TrackingDetails = new List<TrackingDetails>();
-            string status = Helper.GetEstafetaStatus(document).Result;
-            trackingModel.Status = string.IsNullOrEmpty(status) ? "ERROR" : status;
-            if(status == "ENTREGADO")
+            if (fedexResponse.TrackPackagesResponse.successful)
             {
-                trackingModel.Delivered = true;
-                List<TrackingDetails> trackingDetails = Helper.GetEstafetaTrackingDetails(document).Result;
-                trackingModel.TrackingDetails.AddRange(trackingDetails);
+                PackageList fedexPackage = fedexResponse.TrackPackagesResponse.PackageList[0];
+                trackingModel.Status = fedexPackage.KeyStatus;
+                trackingModel.Delivered = fedexPackage.KeyStatusCD == "DL";
+                if (DateTime.TryParse(fedexPackage.displayEstDeliveryDateTime, out DateTime displayEstDeliveryDateTime))
+                {
+                    trackingModel.EstimateDelivery = displayEstDeliveryDateTime;
+                }
+                fedexPackage.ScanEventList.ForEach(package =>
+                {
+                    DateTime? scanDate = null;
+                    if (package.Date != null && package.Time != null)
+                    {
+                        scanDate = package.Date + package.Time;
+                    }
+                    trackingModel.TrackingDetails.Add(new TrackingDetails
+                    {
+                        Date = scanDate,
+                        Event = package.Status,
+                        Messages = package.ScanLocation
+                    });
+                });
             }
-            else
+            return trackingModel;
+        }
+
+        /// <summary>
+        /// Track UPS Package
+        /// </summary>
+        /// <param name="trackingNumber">The tracking number</param>
+        /// <param name="locale">Specify language of details</param>
+        /// <returns></returns>
+        public TrackingModel UPS(string trackingNumber, Locale locale)
+        {
+            UPSResponse uPSResponse = Helper.GetUPSResponseAsync(trackingNumber, _httpClient, locale).Result;
+            TrackingModel trackingModel = new TrackingModel();
+            trackingModel.TrackingDetails = new List<TrackingDetails>();
+            if (uPSResponse.StatusCode == "200")
             {
-                trackingModel.EstimateDelivery = Helper.GetEstafetaEstimateDelivery(document).Result;
-                List<TrackingDetails> trackingDetails = Helper.GetEstafetaTrackingDetails(document).Result;
-                trackingModel.TrackingDetails.AddRange(trackingDetails);                
+                var trackDetails = uPSResponse.TrackDetails[0];
+                trackingModel.Delivered = trackDetails.PackageStatusType == "D";
+                trackingModel.Status = trackDetails.PackageStatus;
+                if (DateTime.TryParse(trackDetails.EstimatedArrival, out DateTime estimatedArrival))
+                {
+                    trackingModel.EstimateDelivery = estimatedArrival;
+                }
+                trackDetails.ShipmentProgressActivities.ForEach(activity =>
+                {
+                    DateTime? scanDate = null;
+                    if (activity.Date != null && activity.Time != null)
+                    {
+                        scanDate = activity.Date + activity.Time;
+                    }
+                    trackingModel.TrackingDetails.Add(new TrackingDetails
+                    {
+                        Date = scanDate,
+                        Event = HttpUtility.HtmlDecode(activity.ActivityScan).Trim(),
+                        Messages = activity.Location
+                    });
+                });
+            }
+            return trackingModel;
+        }
+
+        /// <summary>
+        /// Track UPS Package asynchronously
+        /// </summary>
+        /// <param name="trackingNumber">The tracking number</param>
+        /// <param name="locale">Specify language of details</param>
+        /// <returns></returns>
+        public async Task<TrackingModel> UPSAsync(string trackingNumber, Locale locale) 
+        {
+            UPSResponse uPSResponse = await Helper.GetUPSResponseAsync(trackingNumber, _httpClient, locale);
+            TrackingModel trackingModel = new TrackingModel();
+            trackingModel.TrackingDetails = new List<TrackingDetails>();
+            if (uPSResponse.StatusCode == "200")
+            {
+                var trackDetails = uPSResponse.TrackDetails[0];
+                trackingModel.Delivered = trackDetails.PackageStatusType == "D";
+                trackingModel.Status = trackDetails.PackageStatus;
+                if (DateTime.TryParse(trackDetails.EstimatedArrival, out DateTime estimatedArrival))
+                {
+                    trackingModel.EstimateDelivery = estimatedArrival;
+                }
+                trackDetails.ShipmentProgressActivities.ForEach(activity =>
+                {
+                    DateTime? scanDate = null;
+                    if (activity.Date != null && activity.Time != null)
+                    {
+                        scanDate = activity.Date + activity.Time;
+                    }
+                    trackingModel.TrackingDetails.Add(new TrackingDetails
+                    {
+                        Date = scanDate,
+                        Event = HttpUtility.HtmlDecode(activity.ActivityScan).Trim(),
+                        Messages = activity.Location
+                    });
+                });
             }
             return trackingModel;
         }
@@ -226,35 +197,71 @@ namespace IsatolTracker
         /// </summary>
         /// <param name="trackingNumber">The tracking number or guide number</param>
         /// <returns>Details of the package history</returns>
-        public static async Task<Models.TrackingModel> EstafetaAsync(string trackingNumber) 
+        public Models.TrackingModel Estafeta(string trackingNumber)
         {
-                Dictionary<string, string> keyValuePairs = new Dictionary<string, string>
+            Dictionary<string, string> keyValuePairs = new Dictionary<string, string>
             {
                 { "wayBill", trackingNumber },
                 { "waybillType", trackingNumber.Length == 10 ? "0" : "1" }
             };
-                FormUrlEncodedContent content = new FormUrlEncodedContent(keyValuePairs);
-                HttpResponseMessage response = await client.PostAsync("https://rastreositecorecms.azurewebsites.net/Tracking/searchWayBill/", content);
-                string responseString = await response.Content.ReadAsStringAsync();
-                HtmlAgilityPack.HtmlDocument document = new HtmlAgilityPack.HtmlDocument();
-                document.LoadHtml(responseString);
-                TrackingModel trackingModel = new TrackingModel();
-                trackingModel.TrackingDetails = new List<TrackingDetails>();
-                string status = await Helper.GetEstafetaStatus(document);
-                trackingModel.Status = string.IsNullOrEmpty(status) ? "ERROR" : status;
-                if (status == "ENTREGADO")
-                {
-                    trackingModel.Delivered = true;
-                    List<TrackingDetails> trackingDetails = await Helper.GetEstafetaTrackingDetails(document);
-                    trackingModel.TrackingDetails.AddRange(trackingDetails);
-                }
-                else
-                {
-                    trackingModel.EstimateDelivery = await Helper.GetEstafetaEstimateDelivery(document);
-                    List<TrackingDetails> trackingDetails = await Helper.GetEstafetaTrackingDetails(document);
-                    trackingModel.TrackingDetails.AddRange(trackingDetails);
-                }
-                return trackingModel;            
-        }       
+            FormUrlEncodedContent content = new FormUrlEncodedContent(keyValuePairs);
+            HttpResponseMessage response =  _httpClient.PostAsync("https://rastreositecorecms.azurewebsites.net/Tracking/searchWayBill/", content).Result;
+            string responseString = response.Content.ReadAsStringAsync().Result;
+            HtmlAgilityPack.HtmlDocument document = new HtmlAgilityPack.HtmlDocument();
+            document.LoadHtml(responseString);
+            TrackingModel trackingModel = new TrackingModel();
+            trackingModel.TrackingDetails = new List<TrackingDetails>();
+            string status = Helper.GetEstafetaStatus(document).Result;
+            trackingModel.Status = string.IsNullOrEmpty(status) ? "ERROR" : status;
+            if (status == "ENTREGADO")
+            {
+                trackingModel.Delivered = true;
+                List<TrackingDetails> trackingDetails = Helper.GetEstafetaTrackingDetails(document).Result;
+                trackingModel.TrackingDetails.AddRange(trackingDetails);
+            }
+            else
+            {
+                trackingModel.EstimateDelivery = Helper.GetEstafetaEstimateDelivery(document).Result;
+                List<TrackingDetails> trackingDetails = Helper.GetEstafetaTrackingDetails(document).Result;
+                trackingModel.TrackingDetails.AddRange(trackingDetails);
+            }
+            return trackingModel;
+        }
+
+        /// <summary>
+        /// Track Estafeta packages
+        /// </summary>
+        /// <param name="trackingNumber">The tracking number or guide number</param>
+        /// <returns>Details of the package history</returns>
+        public async Task<Models.TrackingModel> EstafetaAsync(string trackingNumber)
+        {
+            Dictionary<string, string> keyValuePairs = new Dictionary<string, string>
+            {
+                { "wayBill", trackingNumber },
+                { "waybillType", trackingNumber.Length == 10 ? "0" : "1" }
+            };
+            FormUrlEncodedContent content = new FormUrlEncodedContent(keyValuePairs);
+            HttpResponseMessage response = await _httpClient.PostAsync("https://rastreositecorecms.azurewebsites.net/Tracking/searchWayBill/", content);
+            string responseString = await response.Content.ReadAsStringAsync();
+            HtmlAgilityPack.HtmlDocument document = new HtmlAgilityPack.HtmlDocument();
+            document.LoadHtml(responseString);
+            TrackingModel trackingModel = new TrackingModel();
+            trackingModel.TrackingDetails = new List<TrackingDetails>();
+            string status = await Helper.GetEstafetaStatus(document);
+            trackingModel.Status = string.IsNullOrEmpty(status) ? "ERROR" : status;
+            if (status == "ENTREGADO")
+            {
+                trackingModel.Delivered = true;
+                List<TrackingDetails> trackingDetails = await Helper.GetEstafetaTrackingDetails(document);
+                trackingModel.TrackingDetails.AddRange(trackingDetails);
+            }
+            else
+            {
+                trackingModel.EstimateDelivery = await Helper.GetEstafetaEstimateDelivery(document);
+                List<TrackingDetails> trackingDetails = await Helper.GetEstafetaTrackingDetails(document);
+                trackingModel.TrackingDetails.AddRange(trackingDetails);
+            }
+            return trackingModel;
+        }
     }
 }
