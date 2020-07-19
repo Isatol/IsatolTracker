@@ -5,9 +5,12 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using IsatolTracker.Models;
+using Isatol.Tracker.Models;
+using System.Net.Http;
+using System.Net.Http.Formatting;
+using System.Net.Mime;
 
-namespace IsatolTracker
+namespace Isatol.Tracker
 {
     public static class Helper
     {
@@ -82,6 +85,68 @@ namespace IsatolTracker
                 }
                 return trackingDetails;
             });
+        }
+
+        public static async Task<FedexResponse> GetFedexResponseAsync(string trackingNumber, HttpClient client)
+        {
+            string uri = "https://www.fedex.com/trackingCal/track?action=trackpackages&location=es_MX&version=1&format=json&data=";
+            Models.Fedex fedex = new Fedex();
+            List<TrackingInfoList> trackingInfoLists = new List<TrackingInfoList>();
+            trackingInfoLists.Add(new TrackingInfoList
+            {
+                trackNumberInfo = new TrackNumberInfo
+                {
+                    trackingNumber = trackingNumber,
+                    trackingCarrier = "",
+                    trackingQualifier = ""
+                }
+            });
+            TrackPackagesRequest trackPackagesRequest = new TrackPackagesRequest
+            {
+                processingParameters = new ProcessingParameters { },
+                appType = "WTRK",
+                uniqueKey = "",
+                trackingInfoList = trackingInfoLists,
+            };
+            fedex.TrackPackagesRequest = trackPackagesRequest;
+            string jsonFedexModel = Newtonsoft.Json.JsonConvert.SerializeObject(fedex);
+            string newFedexURI = $"{uri}{jsonFedexModel}";
+            var response = await client.PostAsync(newFedexURI, null);
+            string responseObject = await response.Content.ReadAsStringAsync();
+            FedexResponse fedexResponse =  Newtonsoft.Json.JsonConvert.DeserializeObject<FedexResponse>(responseObject);
+            return fedexResponse;
+        }
+
+        public static async Task<UPSResponse> GetUPSResponseAsync(string trackingNumber, HttpClient client, Track.Locale locale)
+        {
+            try
+            {
+                string uri = $"https://www.ups.com/track/api/Track/GetStatus?loc={locale}";
+                Models.UPS uPS = new UPS();
+                uPS.TrackingNumber = new List<string>();
+                uPS.TrackingNumber.Add(trackingNumber);
+                string jsonContent = Newtonsoft.Json.JsonConvert.SerializeObject(uPS);
+                StringContent stringContent = new StringContent(jsonContent, UnicodeEncoding.UTF8, "application/json");
+                HttpRequestMessage httpRequestMessage = new HttpRequestMessage 
+                {
+                    Method = HttpMethod.Post,
+                    RequestUri = new Uri(uri),
+                    Headers =
+                    {
+                        {"User-Agent",  "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)" }
+                    },
+                    Content = stringContent
+                };                
+                HttpResponseMessage response = await client.SendAsync(httpRequestMessage);
+                string responseObject = await response.Content.ReadAsStringAsync();
+                UPSResponse uPSResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<UPSResponse>(responseObject);
+                return uPSResponse;
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }            
         }
     }
 }
