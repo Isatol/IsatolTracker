@@ -13,6 +13,9 @@ Run the TestTracker project to test if everything is ok.
 ### Using the library
 
 ```cs
-TrackingModel trackingFedex = IsatolTracker.Track.Fedex("123456789");
-TrackingModel trackingEstafeta = IsatolTracker.Track.Estafeta("123456789")
+HttpClient httpClient = new HttpClient();
+Isatol.Tracker.Track track = new Isatol.Tracker.Track(httpClient);
+TrackingModel estafeta = await track.Estafeta("123456");
+TrackingModel ups = await track.UPS("123456", Isatol.Tracker.Track.Locale.es_MX);
+TrackingModel fedex = await track.Fedex("123456");
 ```
