@@ -4,5 +4,15 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Isatol.Tracker" Version="1.1.0" />
+    <PackageReference Include="Lib.Net.Http.WebPush" Version="2.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TrackerDAL\TrackerDAL.csproj" />
+  </ItemGroup>
+
 
 </Project>
