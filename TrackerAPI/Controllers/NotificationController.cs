@@ -46,5 +46,15 @@ namespace TrackerAPI.Controllers
                 message = "Subscription Added"
             });
         }
+
+        [HttpPost, Route("[action]")]
+        public async Task<IActionResult> DeleteSubscription([FromBody] TrackerDAL.Models.Notification notification)
+        {
+            await _system.DeleteSuscription(notification.UsersID, notification.Endpoint);
+            return StatusCode(200, new 
+            {
+                message = "You will no longer receive Push notifications"
+            });
+        }
     }
 }

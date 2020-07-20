@@ -76,5 +76,16 @@ namespace TrackerDAL
                 return await connection.QuerySingleAsync<Models.Users>("System.GetUser", parameters, commandType: System.Data.CommandType.StoredProcedure);
             }
         }
+
+        public async Task DeleteSuscription(int userID, string endpoint) 
+        {
+            using(SqlConnection connection = new SqlConnection(_cs))
+            {
+                DynamicParameters parameters = new DynamicParameters();
+                parameters.Add("Endpoint", endpoint);
+                parameters.Add("UserID", userID);
+                await connection.ExecuteAsync("System.DeleteSuscription", parameters, commandType: System.Data.CommandType.StoredProcedure);
+            }
+        }
     }
 }

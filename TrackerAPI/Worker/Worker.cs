@@ -42,7 +42,7 @@ namespace TrackerAPI.Worker
             while (!cancellationToken.IsCancellationRequested)
             {
                 await Execute();
-                await Task.Delay(60000, cancellationToken);
+                await Task.Delay(300000, cancellationToken);
             }
         }
 

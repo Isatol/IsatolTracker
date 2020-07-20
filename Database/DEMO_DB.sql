@@ -171,3 +171,13 @@ AS
 BEGIN
 	SELECT u.Email, u.Name, u.ReceiveEmails FROM System.Users u WHERE u.UsersID = @UserID	
 END;
+
+GO
+
+CREATE PROCEDURE System.DeleteSuscription
+@Endpoint varchar(max) = null,
+@UserID INT = NULL
+AS
+BEGIN
+	DELETE FROM System.Notification WHERE UsersID = @UserID AND Endpoint = @Endpoint
+END;
