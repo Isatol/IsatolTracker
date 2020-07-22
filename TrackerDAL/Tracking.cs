@@ -51,7 +51,7 @@ namespace TrackerDAL
             using(SqlConnection connection = new SqlConnection(_cs))
             {
                 DynamicParameters parameters = new DynamicParameters();
-                parameters.Add("Date", lastPackageUpdate.Date);
+                parameters.Add("Date", lastPackageUpdate.Date, System.Data.DbType.DateTime);
                 parameters.Add("Event", lastPackageUpdate.Event);
                 parameters.Add("PackageID", lastPackageUpdate.PackageID);
                 await connection.ExecuteAsync("Tracking.InsertLastPackageUpdate", parameters, commandType: System.Data.CommandType.StoredProcedure);
@@ -63,7 +63,7 @@ namespace TrackerDAL
             using(SqlConnection connection = new SqlConnection(_cs))
             {
                 DynamicParameters parameters = new DynamicParameters();
-                parameters.Add("Date", lastPackageUpdate.Date);
+                parameters.Add("Date", lastPackageUpdate.Date, System.Data.DbType.DateTime);
                 parameters.Add("Event", lastPackageUpdate.Event);
                 parameters.Add("PackageID", lastPackageUpdate.PackageID);
                 await connection.ExecuteAsync("Tracking.UpdateLastPackage", parameters, commandType: System.Data.CommandType.StoredProcedure);
@@ -87,7 +87,19 @@ namespace TrackerDAL
                 parameters.Add("CompanyID", package.CompanyID);
                 parameters.Add("TrackingNumber", package.TrackingNumber);
                 parameters.Add("UsersID", package.UsersID);
+                parameters.Add("Name", package.Name);
                 await connection.ExecuteAsync("Tracking.InsertPackage", parameters, commandType: System.Data.CommandType.StoredProcedure);
+            }
+        }
+
+        public async Task<List<CompanyPackage>> GetUserPackages(int userID)
+        {
+            using(SqlConnection connection = new SqlConnection(_cs))
+            {
+                DynamicParameters parameters = new DynamicParameters();
+                parameters.Add("UserID", userID);
+                var packages = await connection.QueryAsync<CompanyPackage>("System.GetUserPackages", parameters, commandType: System.Data.CommandType.StoredProcedure);
+                return packages.ToList();
             }
         }
     }
