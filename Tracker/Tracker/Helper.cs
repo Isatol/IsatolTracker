@@ -9,6 +9,7 @@ using Isatol.Tracker.Models;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Mime;
+using System.Web;
 
 namespace Isatol.Tracker
 {
@@ -74,7 +75,7 @@ namespace Isatol.Tracker
                                 trackingDetails.Add(new TrackingDetails
                                 {
                                     Date = DateTime.Parse(tr[0].ToString()),
-                                    Event = tr[1].ToString(),
+                                    Event = HttpUtility.HtmlDecode(tr[1].ToString()).Trim(),
                                     Messages = tr[2].ToString()
                                 });
                             }
