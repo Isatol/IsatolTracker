@@ -22,8 +22,8 @@ namespace Isatol.Tracker.Models
 
     public class ShipmentProgressActivities
     {
-        public DateTime? Date { get; set; }
-        public TimeSpan? Time { get; set; }
+        public string Date { get; set; }
+        public string Time { get; set; }
         public string Location { get; set; }
         public string ActivityScan { get; set; }
 
