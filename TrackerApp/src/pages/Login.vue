@@ -105,6 +105,7 @@ export default {
       ShowPass: false
     };
   },
+  created() {},
   methods: {
     Login(user, password) {
       request("Auth/Login", {
