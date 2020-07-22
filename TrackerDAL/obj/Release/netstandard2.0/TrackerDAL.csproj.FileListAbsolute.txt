@@ -1,0 +1,9 @@
+C:\Proyectos\PackageTracker\TrackerDAL\bin\Release\netstandard2.0\TrackerDAL.deps.json
+C:\Proyectos\PackageTracker\TrackerDAL\bin\Release\netstandard2.0\TrackerDAL.dll
+C:\Proyectos\PackageTracker\TrackerDAL\bin\Release\netstandard2.0\TrackerDAL.pdb
+C:\Proyectos\PackageTracker\TrackerDAL\obj\Release\netstandard2.0\TrackerDAL.csprojAssemblyReference.cache
+C:\Proyectos\PackageTracker\TrackerDAL\obj\Release\netstandard2.0\TrackerDAL.AssemblyInfoInputs.cache
+C:\Proyectos\PackageTracker\TrackerDAL\obj\Release\netstandard2.0\TrackerDAL.AssemblyInfo.cs
+C:\Proyectos\PackageTracker\TrackerDAL\obj\Release\netstandard2.0\TrackerDAL.csproj.CoreCompileInputs.cache
+C:\Proyectos\PackageTracker\TrackerDAL\obj\Release\netstandard2.0\TrackerDAL.dll
+C:\Proyectos\PackageTracker\TrackerDAL\obj\Release\netstandard2.0\TrackerDAL.pdb

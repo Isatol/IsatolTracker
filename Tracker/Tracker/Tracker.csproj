@@ -10,14 +10,16 @@
     <Description>Track packages from UPS, Fedex and Estafeta MX.</Description>
     <RepositoryType>Library</RepositoryType>
     <PackageTags>PackageTracker Package Tracker Tracking</PackageTags>
-    <PackageReleaseNotes>1.1.0 First release</PackageReleaseNotes>
+    <PackageReleaseNotes>1.1.2 Fixed Parse Estafeta Dates
+1.1.1 Fixed Estafeta strings that were encoded
+1.1.0 First release</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/Isatol/IsatolTracker</RepositoryUrl>
-    <Version>1.1.0</Version>
+    <Version>1.1.2</Version>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,9 +1,11 @@
 ﻿using Isatol.Tracker;
 using Lib.Net.Http.WebPush;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
@@ -23,8 +25,8 @@ namespace TrackerAPI.Worker
         private readonly Isatol.Tracker.Track _track;
         private readonly TrackerDAL.TrackerSystem _system;
         private readonly Models.EmailSettings _emailSettings;
-
-        public Worker(Helper.ConnectionStrings connectionStrings, IOptions<PushNotification> pushNotification, Isatol.Tracker.Track track, IOptions<EmailSettings> emailSettings, PushServiceClient pushServiceClient)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        public Worker(Helper.ConnectionStrings connectionStrings, IOptions<PushNotification> pushNotification, Isatol.Tracker.Track track, IOptions<EmailSettings> emailSettings, PushServiceClient pushServiceClient, IWebHostEnvironment webHostEnvironment)
         {
             _tracking = new TrackerDAL.Tracking(connectionStrings.GetConnectionString());
             _pushServiceClient = pushServiceClient;
@@ -35,6 +37,7 @@ namespace TrackerAPI.Worker
             _track = track;
             _system = new TrackerDAL.TrackerSystem(connectionStrings.GetConnectionString());
             _emailSettings = emailSettings.Value;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -42,7 +45,7 @@ namespace TrackerAPI.Worker
             while (!cancellationToken.IsCancellationRequested)
             {
                 await Execute();
-                await Task.Delay(1800000, cancellationToken);
+                await Task.Delay(10800000, cancellationToken);
             }
         }
 
@@ -59,14 +62,14 @@ namespace TrackerAPI.Worker
                     {
                         case 1:
                             Isatol.Tracker.Models.TrackingModel estafeta = await _track.EstafetaAsync(p.TrackingNumber);
-//#if DEBUG
-//                            estafeta.TrackingDetails.Insert(0, new Isatol.Tracker.Models.TrackingDetails
-//                            {
-//                                Date = DateTime.Now,
-//                                Event = "En proceso en ir a la casa",
-//                                Messages = ""
-//                            });
-//#endif
+#if DEBUG
+                            estafeta.TrackingDetails.Insert(0, new Isatol.Tracker.Models.TrackingDetails
+                            {
+                                Date = DateTime.Now,
+                                Event = "En proceso en ir a la casa",
+                                Messages = ""
+                            });
+#endif
                             if (lastPackageUpdate == null)
                             {                                
                                 await _tracking.InsertLastPackageUpdate(new TrackerDAL.Models.LastPackageUpdate 
@@ -164,20 +167,34 @@ namespace TrackerAPI.Worker
                     await _pushServiceClient.RequestPushMessageDeliveryAsync(pushSubscription, pushMessage);
                 });
             }
-            if (user.ReceiveEmails) await SendEmailNotification(user.Email);
+            string rootPath = _webHostEnvironment.ContentRootPath;
+            string templatePath = Path.Combine(rootPath, "Templates", "SendNotification.html");
+            string template = await System.IO.File.ReadAllTextAsync(templatePath);            
+           await SendEmailNotification(user.Email, new Dictionary<string, string> 
+           {
+               {"#nombre#", user.Name },
+               {"#paquete#", packageName },
+               {"#evento#", packageEvent }
+           }, template, true);
         }
         
-        private async Task SendEmailNotification(string recipient)
+        private async Task SendEmailNotification(string recipient, Dictionary<string, string> keyValuePairsReplaceItems, string body, bool isBodyHTML)
         {
             try
             {
+                string aux = "";
                 using (MailMessage mm = new MailMessage())
                 {
+                    aux = body;
+                    foreach (var item in keyValuePairsReplaceItems)
+                    {
+                        aux = aux.Replace(item.Key, item.Value);
+                    }
                     mm.Subject = _emailSettings.Subject;
                     mm.From = new MailAddress(_emailSettings.Email);
                     mm.To.Add(recipient);
-                    mm.Body = _emailSettings.Body;
-                    mm.IsBodyHtml = _emailSettings.IsBodyHtml;
+                    mm.Body = aux;
+                    mm.IsBodyHtml = isBodyHTML;
                     using (SmtpClient smtpClient = new SmtpClient())
                     {
                         smtpClient.Host = _emailSettings.SMTPServer;

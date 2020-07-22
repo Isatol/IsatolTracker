@@ -22,7 +22,7 @@ namespace TrackerDAL
                 DynamicParameters parameters = new DynamicParameters();
                 parameters.Add("Email", email);
                 parameters.Add("Password", password);
-                return await connection.QuerySingleAsync<Models.Users>("System.Login", parameters, commandType: System.Data.CommandType.StoredProcedure);
+                return await connection.QuerySingleOrDefaultAsync<Models.Users>("System.Login", parameters, commandType: System.Data.CommandType.StoredProcedure);
             }
         }
 
@@ -85,6 +85,16 @@ namespace TrackerDAL
                 parameters.Add("Endpoint", endpoint);
                 parameters.Add("UserID", userID);
                 await connection.ExecuteAsync("System.DeleteSuscription", parameters, commandType: System.Data.CommandType.StoredProcedure);
+            }
+        }
+
+        public async Task AddLog(string log)
+        {
+            using(SqlConnection connection = new SqlConnection(_cs))
+            {
+                DynamicParameters parameters = new DynamicParameters();
+                parameters.Add("Log", log);
+                await connection.ExecuteAsync("System.AddLog", parameters, commandType: System.Data.CommandType.StoredProcedure);
             }
         }
     }

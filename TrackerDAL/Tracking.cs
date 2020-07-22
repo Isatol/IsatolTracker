@@ -102,5 +102,15 @@ namespace TrackerDAL
                 return packages.ToList();
             }
         }
+
+        public async Task DeletePackage(int packageID)
+        {
+            using(SqlConnection connection = new SqlConnection(_cs))
+            {
+                DynamicParameters parameters = new DynamicParameters();
+                parameters.Add("PackageID", packageID);
+                connection.Execute("Tracking.DeletePackage", parameters, commandType: System.Data.CommandType.StoredProcedure);                
+            }
+        }
     }
 }

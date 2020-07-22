@@ -74,9 +74,9 @@ namespace Isatol.Tracker
                             {
                                 trackingDetails.Add(new TrackingDetails
                                 {
-                                    Date = DateTime.Parse(tr[0].ToString()),
+                                    Date = DateTime.Parse(tr[0].ToString().Replace("A. M.", "AM").Replace("P. M.", "PM")),
                                     Event = HttpUtility.HtmlDecode(tr[1].ToString()).Trim(),
-                                    Messages = tr[2].ToString()
+                                    Messages = HttpUtility.HtmlDecode(tr[2].ToString())
                                 });
                             }
                         });

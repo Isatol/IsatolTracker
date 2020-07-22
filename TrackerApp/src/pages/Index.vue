@@ -1,23 +1,9 @@
 <template>
-  <q-page class="items-center justify-center row">
-    <!-- <img
-      alt="Quasar logo"
-      src="~assets/quasar-logo-full.svg"
-    > -->
-    <!-- <div class="col-12">
-      <q-btn
-        v-if="!thereIsASubscription"
-        label="Permitir notificaciones"
-        @click="PermitirNotificaciones()"
-      ></q-btn>
-      <q-btn
-        v-else
-        label="Eliminar suscripción"
-        @click="EliminarSuscripcion()"
-      ></q-btn>
-    </div> -->
+  <q-page class="">
     <div class="q-pa-lg">
       <q-table
+        no-data-label="No hay datos para mostrar"
+        rows-per-page-label="Paquetes por página"
         grid
         :filter="filter"
         card-class="bg-primary text-white"
@@ -39,14 +25,8 @@
           </q-input>
         </template>
         <template slot="item" slot-scope="props">
-          <div
-            :class="
-              filter.length > 0
-                ? 'q-pa-xs q-pl-xs col-xs-12 col-sm-6 col-md-12'
-                : 'q-pa-xs q-pl-xs col-xs-12 col-sm-6 col-md-3'
-            "
-          >
-            <q-card bordered>
+          <div class="q-pa-xs q-pl-xs col-xs-12 col-sm-6 col-md-3">
+            <q-card bordered style="">
               <div class="row ">
                 <div class="col">
                   <q-item>
@@ -67,7 +47,17 @@
                   </q-item>
                 </div>
                 <div class="col-auto">
-                  <q-btn color="red" size="md" round flat icon="mdi-delete">
+                  <q-btn
+                    color="red"
+                    size="md"
+                    @click="
+                      dialogDeletePackage = true;
+                      packageID = props.row.packageID;
+                    "
+                    round
+                    flat
+                    icon="mdi-delete"
+                  >
                   </q-btn>
                 </div>
               </div>
@@ -207,6 +197,31 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+    <q-dialog v-model="dialogDeletePackage" persistent>
+      <q-card style="width: 400px">
+        <q-card-section>
+          <div class="text-h6">
+            ¿Estás seguro de eliminar el paquete?
+          </div>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn
+            @click="
+              packageID = null;
+              dialogDeletePackage = false;
+            "
+            flat
+            label="Cancelar"
+          ></q-btn>
+          <q-btn
+            @click="DeletePackage()"
+            flat
+            label="Eliminar"
+            color="red"
+          ></q-btn>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
     <q-page-sticky position="bottom-right" :offset="[18, 18]">
       <q-btn @click="dialogNewPackage = true" fab icon="add" color="primary" />
     </q-page-sticky>
@@ -224,6 +239,8 @@ export default {
   name: "PageIndex",
   data() {
     return {
+      packageID: null,
+      dialogDeletePackage: false,
       loadingNewPackage: false,
       loadingDetails: false,
       packageName: "",
@@ -274,6 +291,12 @@ export default {
     this.GetUserPackages();
   },
   computed: {
+    cardClas() {
+      return "q-pa-xs q-pl-xs col-xs-12 col-sm-6 col-md-3";
+      // this.filter.length > 0
+      //   ? "q-pa-xs q-pl-xs col-xs-12 col-sm-6 col-md-12"
+      //   : "q-pa-xs q-pl-xs col-xs-12 col-sm-6 col-md-3";
+    },
     isDisabled() {
       return (
         this.inputTrackingNumber === null ||
@@ -281,13 +304,29 @@ export default {
         this.inputTrackingNumber === "" ||
         this.company === null
       );
-    },
-    thereIsASubscription() {
-      console.log(this.$store.getters["user/getSubscriptionState"]);
-      return this.$store.getters["user/getSubscriptionState"];
     }
   },
   methods: {
+    DeletePackage() {
+      request("Track/DeletePackage", {
+        method: "post",
+        data: JSON.stringify({
+          PackageID: this.packageID
+        })
+      })
+        .then(response => {
+          this.$q.notify({
+            type: "positive",
+            message: response.messages,
+            progress: true
+          });
+        })
+        .finally(() => {
+          this.dialogDeletePackage = false;
+          this.packageID = null;
+          this.GetUserPackages();
+        });
+    },
     GetTrackingModel(companyID, trackingNumber, packageName) {
       if (this.loadingDetails) return;
       this.loadingDetails = true;
@@ -335,7 +374,11 @@ export default {
         })
       })
         .then(res => {
-          console.log(res);
+          this.$q.notify({
+            type: "positive",
+            message: res.message,
+            progress: true
+          });
         })
         .finally(() => {
           this.dialogNewPackage = false;
@@ -367,61 +410,6 @@ export default {
             this.$store.commit("user/changeSubscriptionState", true);
           }
         });
-      });
-    },
-    EliminarSuscripcion() {
-      navigator.serviceWorker.ready.then(sw => {
-        sw.pushManager.getSubscription().then(subscription => {
-          const jsonSubscription = subscription.toJSON();
-          subscription.unsubscribe().then(() => {
-            request("Notification/DeleteSubscription", {
-              method: "post",
-              data: JSON.stringify({
-                UsersID: this.$store.getters["user/getUser"].userID,
-                Endpoint: jsonSubscription.endpoint
-              })
-            })
-              .then(response => {
-                console.log(response);
-              })
-              .finally(
-                this.$store.commit("user/changeSubscriptionState", false)
-              );
-          });
-        });
-      });
-    },
-    PermitirNotificaciones() {
-      Notification.requestPermission().then(permiso => {
-        if (permiso === "granted") {
-          request("Notification/GetVapidPublicKey", {
-            method: "get"
-          }).then(res => {
-            navigator.serviceWorker.ready.then(register => {
-              register.pushManager
-                .subscribe({
-                  userVisibleOnly: true,
-                  applicationServerKey: res.publicKey
-                })
-                .then(resSubscription => {
-                  register.pushManager.getSubscription().then(subscription => {
-                    request("Notification/AddNotificationSubscription", {
-                      method: "post",
-                      data: JSON.stringify({
-                        PushSubscription: subscription.toJSON(),
-                        UserID: 1
-                      })
-                    }).then(() => {
-                      register.showNotification("Notificaciones activas", {
-                        body: "Estás recibiendo notificaciones "
-                      });
-                      this.$store.commit("user/changeSubscriptionState", true);
-                    });
-                  });
-                });
-            });
-          });
-        }
       });
     }
   }

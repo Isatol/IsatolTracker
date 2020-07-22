@@ -1,8 +1,8 @@
 {
   "name": "trackerapp",
   "version": "0.0.1",
-  "description": "A Quasar Framework app",
-  "productName": "Quasar App",
+  "description": "Package Tracker",
+  "productName": "Isatol Package Tracker",
   "author": "Isaías Orozco Toledo <isatol.an@gmail.com>",
   "private": true,
   "scripts": {

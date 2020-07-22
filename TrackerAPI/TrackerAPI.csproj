@@ -1,17 +1,17 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Isatol.Tracker" Version="1.1.2" />
     <PackageReference Include="Lib.Net.Http.WebPush" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.6" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\TrackerDAL\TrackerDAL.csproj" />
-    <ProjectReference Include="..\Tracker\Tracker\Tracker.csproj" />
   </ItemGroup>
 
 

@@ -38,10 +38,14 @@ namespace TrackerAPI.Controllers
                 string token = new JwtSecurityTokenHandler().WriteToken(await CreateToken("localhost", "localhost", claims, 14400, "Localhost.2020*****"));
                 return StatusCode(200, new
                 {
+                    code = 1,
                     token
                 });
             }
-            return StatusCode(404);
+            return StatusCode(200, new 
+            {
+                code = 2
+            });
         }
         
         private async Task<JwtSecurityToken> CreateToken(string issuer, string audience, List<Claim> claims, double expirationMinutes, string securityKey)

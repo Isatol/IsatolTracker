@@ -43,7 +43,8 @@ namespace TrackerAPI.Controllers
             });
             return StatusCode(200, new 
             {
-                message = "Subscription Added"
+                code = 1,
+                message = "Suscripción a las notificaciones activadas"
             });
         }
 
@@ -53,7 +54,8 @@ namespace TrackerAPI.Controllers
             await _system.DeleteSuscription(notification.UsersID, notification.Endpoint);
             return StatusCode(200, new 
             {
-                message = "You will no longer receive Push notifications"
+                code = 1,
+                message = "Ya no recibirás notificaciones en ningún medio"
             });
         }
     }

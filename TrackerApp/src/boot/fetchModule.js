@@ -5,8 +5,10 @@
 import { createInstance, useWithHeaders } from "@isatol/fetchmodule";
 export default async (/* { app, router, Vue ... } */) => {
   // something to do
-  console.log(process.env.API + "Auth/Login");
-  createInstance("http://localhost:5000/api/");
+  const api = process.env.DEV
+    ? "http://localhost:5000/api/"
+    : "https://isatolpackagetrackerapi.azurewebsites.net/api/";
+  createInstance(api);
   const headers = new Headers();
   headers.append("Content-Type", "application/json");
   if (sessionStorage.getItem("token")) {

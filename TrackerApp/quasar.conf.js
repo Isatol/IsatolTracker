@@ -93,7 +93,7 @@ module.exports = function(ctx) {
       importStrategy: "auto",
 
       // Quasar plugins
-      plugins: []
+      plugins: ["Notify"]
     },
 
     // animations: 'all', // --- includes all animations
@@ -110,9 +110,9 @@ module.exports = function(ctx) {
       workboxPluginMode: "InjectManifest", // 'GenerateSW' or 'InjectManifest'
       workboxOptions: {}, // only for GenerateSW
       manifest: {
-        name: "Quasar App",
-        short_name: "Quasar App",
-        description: "A Quasar Framework app",
+        name: "Package Tracker",
+        short_name: "Package Tracker",
+        description: "Track packages from UPS, Fedex and Estafeta MX",
         display: "standalone",
         orientation: "portrait",
         background_color: "#ffffff",
