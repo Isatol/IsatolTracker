@@ -181,3 +181,16 @@ AS
 BEGIN
 	DELETE FROM System.Notification WHERE UsersID = @UserID AND Endpoint = @Endpoint
 END;
+
+GO
+
+CREATE PROCEDURE System.GetUserPackages
+@UserID INT = NULL
+AS
+BEGIN
+	SELECT p.Name PackageName, p.PackageID, p.TrackingNumber, c.CompanyID, c.Name, c.Logo,
+		l.Date, l.Event
+	FROM Tracking.Package p JOIN Tracking.Company c ON c.CompanyID = p.CompanyID 
+		LEFT JOIN Tracking.LastPackageUpdate l ON l.PackageID = p.PackageID
+	WHERE p.UsersID = @UserID
+END;
