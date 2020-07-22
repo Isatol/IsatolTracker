@@ -9,6 +9,7 @@ using Isatol.Tracker.Models;
 using System.Linq.Expressions;
 using System.Net.Http.Formatting;
 using System.Web;
+using System.Globalization;
 
 namespace Isatol.Tracker
 {
@@ -141,7 +142,7 @@ namespace Isatol.Tracker
                     DateTime? scanDate = null;
                     if (activity.Date != null && activity.Time != null)
                     {
-                        scanDate = activity.Date + activity.Time;
+                        scanDate = DateTime.ParseExact(activity.Date, "MM/dd/yyyy", CultureInfo.InvariantCulture) + DateTime.Parse(activity.Time.Replace(".", "")).TimeOfDay;
                     }
                     trackingModel.TrackingDetails.Add(new TrackingDetails
                     {
@@ -176,10 +177,10 @@ namespace Isatol.Tracker
                 }
                 trackDetails.ShipmentProgressActivities.ForEach(activity =>
                 {
-                    DateTime? scanDate = null;
+                    DateTime? scanDate = null;                    
                     if (activity.Date != null && activity.Time != null)
                     {
-                        scanDate = activity.Date + activity.Time;
+                        scanDate = DateTime.ParseExact(activity.Date, "MM/dd/yyyy", CultureInfo.InvariantCulture) + DateTime.Parse(activity.Time.Replace(".", "")).TimeOfDay;
                     }
                     trackingModel.TrackingDetails.Add(new TrackingDetails
                     {
