@@ -1,3 +1,4 @@
+import TrackingDetails from "pages/TrackingDetails.vue";
 const routes = [
   {
     path: "/",
@@ -11,7 +12,16 @@ const routes = [
     children: [
       {
         path: "",
-        component: () => import("pages/Index.vue")
+        component: () => import("pages/Index.vue"),
+        children: [
+          {
+            path: "track/:companyID",
+            name: "trackingPackage",
+            components: {
+              tracking: TrackingDetails
+            }
+          }
+        ]
       }
     ]
   },
