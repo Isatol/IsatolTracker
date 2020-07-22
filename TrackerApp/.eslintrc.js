@@ -64,6 +64,9 @@ module.exports = {
     quotes: "off",
     semi: "off",
     "space-before-function-paren": "off",
+    "vue/valid-v-for": "off",
+    "vue/no-parsing-error": "off",
+    "vue/valid-v-bind": "off",
 
     // allow debugger during development only
     "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off"
