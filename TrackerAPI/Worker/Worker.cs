@@ -42,7 +42,7 @@ namespace TrackerAPI.Worker
             while (!cancellationToken.IsCancellationRequested)
             {
                 await Execute();
-                await Task.Delay(300000, cancellationToken);
+                await Task.Delay(1800000, cancellationToken);
             }
         }
 
@@ -59,14 +59,14 @@ namespace TrackerAPI.Worker
                     {
                         case 1:
                             Isatol.Tracker.Models.TrackingModel estafeta = await _track.EstafetaAsync(p.TrackingNumber);
-#if DEBUG
-                            estafeta.TrackingDetails.Insert(0, new Isatol.Tracker.Models.TrackingDetails
-                            {
-                                Date = DateTime.Now,
-                                Event = "En proceso en ir a la casa",
-                                Messages = ""
-                            });
-#endif
+//#if DEBUG
+//                            estafeta.TrackingDetails.Insert(0, new Isatol.Tracker.Models.TrackingDetails
+//                            {
+//                                Date = DateTime.Now,
+//                                Event = "En proceso en ir a la casa",
+//                                Messages = ""
+//                            });
+//#endif
                             if (lastPackageUpdate == null)
                             {                                
                                 await _tracking.InsertLastPackageUpdate(new TrackerDAL.Models.LastPackageUpdate 
@@ -110,7 +110,7 @@ namespace TrackerAPI.Worker
                             }
                             break;
                         case 3:
-                            Isatol.Tracker.Models.TrackingModel ups = await _track.UPSAsync(p.TrackingNumber, Track.Locale.es_MX);
+                            Isatol.Tracker.Models.TrackingModel ups = await _track.UPSAsync(p.TrackingNumber, Track.Locale.en_US);
                             if(lastPackageUpdate == null)
                             {
                                 await _tracking.InsertLastPackageUpdate(new TrackerDAL.Models.LastPackageUpdate 
