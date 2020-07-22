@@ -11,10 +11,10 @@
 
         <!-- VivaCare -->
         <div
-          class="text-center col-xs-10 col-sm-12 col-md-12 col-lg-10 col-xl-12"
+          class="text-center col-xs-12 col-sm-12 col-md-12 col-lg-10 col-xl-12"
         >
-          <span class="color-primary text-h2 text-weight-medium">Package</span>
-          <span class="color-primary text-h3">Tracker</span>
+          <span class="color-primary text-h2 text-weight-small">Package</span>
+          <span class="color-primary text-h4">Tracker</span>
         </div>
 
         <!-- Espaciador -->
@@ -24,9 +24,9 @@
 
         <!-- Usuario -->
         <div class="col-xs-12 col-sm-10 col-md-10 col-lg-12 col-xl-8">
-          <q-input v-model="Usuario" dense outlined rounded label="Usuario">
+          <q-input v-model="Usuario" dense outlined rounded label="Correo">
             <template v-slot:before>
-              <q-icon name="fas fa-user"></q-icon>
+              <q-icon name="mdi-at"></q-icon>
             </template>
           </q-input>
           <br />
@@ -44,18 +44,18 @@
             @keypress.enter="Login(Usuario, Password)"
           >
             <template v-slot:before>
-              <q-icon name="fas fa-key"></q-icon>
+              <q-icon name="mdi-form-textbox-password"></q-icon>
             </template>
             <template v-slot:append>
               <q-icon
-                :name="ShowPass ? 'fas fa-eye' : 'fas fa-eye-slash'"
+                :name="ShowPass ? 'mdi-eye' : 'mdi-eye-off'"
                 @click="ShowPass = !ShowPass"
               ></q-icon>
             </template>
           </q-input>
         </div>
         <!-- ¿Olvidaste tu contraseña? -->
-        <div
+        <!-- <div
           class="text-right col-xs-12 col-sm-10 col-md-10 col-lg-12 col-xl-8"
         >
           <q-chip
@@ -66,7 +66,7 @@
             @click="SolicitarPassword = true"
             >Olvidaste tu contraseña</q-chip
           >
-        </div>
+        </div> -->
 
         <!-- Espaciador -->
         <div class="col-xs-12">
@@ -77,6 +77,7 @@
         <!-- Boton Iniciar Sesión -->
         <div class="text-center col-xs-8 col-sm-8 col-md-6 col-lg-12 col-xl-6">
           <q-btn
+            color="primary"
             class="btn-primary full-width"
             label="Iniciar Sesión"
             @click="Login(Usuario, Password)"
@@ -102,10 +103,14 @@ export default {
     return {
       Usuario: "",
       Password: "",
-      ShowPass: false
+      ShowPass: true
     };
   },
-  created() {},
+  beforeCreate() {
+    if (localStorage.getItem("token")) {
+      location.replace("home");
+    }
+  },
   methods: {
     Login(user, password) {
       request("Auth/Login", {
@@ -115,8 +120,16 @@ export default {
           Password: password
         })
       }).then(res => {
-        localStorage.setItem("token", res.token);
-        location.replace("home");
+        if (res.code === 1) {
+          localStorage.setItem("token", res.token);
+          location.replace("home");
+        } else {
+          this.$q.notify({
+            type: "negative",
+            message: "Usuario o contraseña no válidos",
+            color: "red"
+          });
+        }
       });
     }
   }
