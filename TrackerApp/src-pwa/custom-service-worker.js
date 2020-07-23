@@ -10,7 +10,8 @@ self.addEventListener("push", evt => {
   const objNotification = evt.data.json();
   const options = {
     body: objNotification.notification.body,
-    icon: objNotification.notification.icon
+    icon: objNotification.notification.icon,
+    vibrate: [200, 100, 200, 100]
   };
   self.registration.showNotification(
     objNotification.notification.title,
