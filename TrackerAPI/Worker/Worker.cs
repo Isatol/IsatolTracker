@@ -32,7 +32,7 @@ namespace TrackerAPI.Worker
             _pushServiceClient = pushServiceClient;
             _pushServiceClient.DefaultAuthentication = new Lib.Net.Http.WebPush.Authentication.VapidAuthentication(pushNotification.Value.PublicKey, pushNotification.Value.PrivateKey) 
             {
-                Subject = "mailto:iot_93@hotmail.com"
+                Subject = $"mailto:{emailSettings.Value.Email}"
             };
             _track = track;
             _system = new TrackerDAL.TrackerSystem(connectionStrings.GetConnectionString());
@@ -54,8 +54,12 @@ namespace TrackerAPI.Worker
             List<TrackerDAL.Models.Package> packages = await _tracking.GetPackages();            
             if(packages.Count > 0)
             {
+                string rootPath = _webHostEnvironment.ContentRootPath;
+                string templatePath = Path.Combine(rootPath, "Templates", "SendNotification.html");
+                string template = await System.IO.File.ReadAllTextAsync(templatePath);
                 packages.ForEach(async p => 
                 {
+                    TrackerDAL.Models.Users user = await _system.GetUser(p.UsersID);
                     TrackerDAL.Models.Company company = await _tracking.GetCompany(p.CompanyID);
                     TrackerDAL.Models.LastPackageUpdate lastPackageUpdate = await _tracking.GetLastPackageUpdate(p.PackageID);                    
                     switch (company.CompanyID)
@@ -88,6 +92,15 @@ namespace TrackerAPI.Worker
                                     Event = estafeta.TrackingDetails[0].Event,
                                     PackageID = p.PackageID
                                 });
+                                if (user.ReceiveEmails)
+                                {
+                                    await SendEmailNotification(user.Email, new Dictionary<string, string>
+                                       {
+                                           {"#nombre#", user.Name },
+                                           {"#paquete#", p.Name },
+                                           {"#evento#", $"{estafeta.TrackingDetails[0].Event} {estafeta.TrackingDetails[0].Messages}" }
+                                       }, template, true);
+                                }
                             }
                             break;
                         case 2:
@@ -110,10 +123,19 @@ namespace TrackerAPI.Worker
                                     Event = fedex.TrackingDetails[0].Event,
                                     PackageID = p.PackageID
                                 });
+                                if (user.ReceiveEmails)
+                                {
+                                    await SendEmailNotification(user.Email, new Dictionary<string, string>
+                                       {
+                                           {"#nombre#", user.Name },
+                                           {"#paquete#", p.Name },
+                                           {"#evento#", $"{fedex.TrackingDetails[0].Event} {fedex.TrackingDetails[0].Messages}" }
+                                       }, template, true);
+                                }
                             }
                             break;
                         case 3:
-                            Isatol.Tracker.Models.TrackingModel ups = await _track.UPSAsync(p.TrackingNumber, Track.Locale.en_US);
+                            Isatol.Tracker.Models.TrackingModel ups = await _track.UPSAsync(p.TrackingNumber, Track.Locale.es_MX);
                             if(lastPackageUpdate == null)
                             {
                                 await _tracking.InsertLastPackageUpdate(new TrackerDAL.Models.LastPackageUpdate 
@@ -132,6 +154,15 @@ namespace TrackerAPI.Worker
                                     Event = ups.TrackingDetails[0].Event,
                                     PackageID = p.PackageID
                                 });
+                                if (user.ReceiveEmails)
+                                {
+                                    await SendEmailNotification(user.Email, new Dictionary<string, string>
+                                       {
+                                           {"#nombre#", user.Name },
+                                           {"#paquete#", p.Name },
+                                           {"#evento#", $"{ups.TrackingDetails[0].Event} {ups.TrackingDetails[0].Messages}" }
+                                       }, template, true);
+                                }
                             }
                             break;
                     }                    
@@ -142,8 +173,6 @@ namespace TrackerAPI.Worker
         private async Task SendPushNotification(int userID, string company, string companyLogo, string packageName, string packageEvent)
         {
             List<TrackerDAL.Models.Notification> notifications = await _system.GetUserNotifications(userID);
-            TrackerDAL.Models.Users user = await _system.GetUser(userID);
-
             if(notifications.Count > 0)
             {
                 PushMessage pushMessage = new Models.Notification 
@@ -167,15 +196,6 @@ namespace TrackerAPI.Worker
                     await _pushServiceClient.RequestPushMessageDeliveryAsync(pushSubscription, pushMessage);
                 });
             }
-            string rootPath = _webHostEnvironment.ContentRootPath;
-            string templatePath = Path.Combine(rootPath, "Templates", "SendNotification.html");
-            string template = await System.IO.File.ReadAllTextAsync(templatePath);            
-           await SendEmailNotification(user.Email, new Dictionary<string, string> 
-           {
-               {"#nombre#", user.Name },
-               {"#paquete#", packageName },
-               {"#evento#", packageEvent }
-           }, template, true);
         }
         
         private async Task SendEmailNotification(string recipient, Dictionary<string, string> keyValuePairsReplaceItems, string body, bool isBodyHTML)
