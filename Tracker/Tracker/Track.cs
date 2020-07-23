@@ -177,10 +177,22 @@ namespace Isatol.Tracker
                 }
                 trackDetails.ShipmentProgressActivities.ForEach(activity =>
                 {
-                    DateTime? scanDate = null;                    
+                    DateTime? scanDate = null; 
                     if (activity.Date != null && activity.Time != null)
                     {
-                        scanDate = DateTime.ParseExact(activity.Date, "MM/dd/yyyy", CultureInfo.InvariantCulture) + DateTime.Parse(activity.Time.Replace(".", "")).TimeOfDay;
+                        if (locale == Locale.en_US)
+                        {
+                            string[] splitDate = activity.Date.Split('/');
+                            string newDate = $"{splitDate[2]}-{splitDate[0]}-{splitDate[1]} {activity.Time.Replace(".", "")}";
+                            scanDate = Convert.ToDateTime(newDate);
+
+                        }
+                        else
+                        {
+                            string[] splitDate = activity.Date.Split('/');
+                            string newDate = $"{splitDate[2]}-{splitDate[1]}-{splitDate[0]} {activity.Time.Replace(".", "")}";
+                            scanDate = Convert.ToDateTime(newDate);
+                        }
                     }
                     trackingModel.TrackingDetails.Add(new TrackingDetails
                     {

@@ -72,9 +72,11 @@ namespace Isatol.Tracker
                         {
                             for (int i = 0; i < tr.Count; i++)
                             {
+                                var eventDate = tr[0].ToString().Split('/');
+                                var newEventDate = $"{eventDate[2].Substring(0, 4)}-{eventDate[1]}-{eventDate[0]} {eventDate[2].Substring(5).Replace("A. M.", "AM").Replace("P. M.", "PM")}";
                                 trackingDetails.Add(new TrackingDetails
                                 {
-                                    Date = DateTime.Parse(tr[0].ToString().Replace("A. M.", "AM").Replace("P. M.", "PM")),
+                                    Date = DateTime.Parse(newEventDate),
                                     Event = HttpUtility.HtmlDecode(tr[1].ToString()).Trim(),
                                     Messages = HttpUtility.HtmlDecode(tr[2].ToString())
                                 });
