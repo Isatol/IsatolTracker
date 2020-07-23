@@ -10,7 +10,8 @@
     <Description>Track packages from UPS, Fedex and Estafeta MX.</Description>
     <RepositoryType>Library</RepositoryType>
     <PackageTags>PackageTracker Package Tracker Tracking</PackageTags>
-    <PackageReleaseNotes>1.1.2 Fixed Parse Estafeta Dates
+    <PackageReleaseNotes>1.1.3 Estafeta and UPS dates now have YYYY-MM-DD format in TrackingDetails List.
+1.1.2 Fixed Parse Estafeta Dates
 1.1.1 Fixed Estafeta strings that were encoded
 1.1.0 First release</PackageReleaseNotes>
   </PropertyGroup>
@@ -19,7 +20,7 @@
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/Isatol/IsatolTracker</RepositoryUrl>
-    <Version>1.1.2</Version>
+    <Version>1.1.3</Version>
   </PropertyGroup>
 
   <ItemGroup>
