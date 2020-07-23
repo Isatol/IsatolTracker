@@ -32,6 +32,28 @@
                   </q-item-section>
                   <q-item-section>Desactivar notificaciones</q-item-section>
                 </q-item>
+                <q-item
+                  clickable
+                  v-close-popup
+                  v-if="!isUserReceiveEmails"
+                  @click="UpdateReceiveEmails(true)"
+                >
+                  <q-item-section avatar>
+                    <q-icon name="mdi-email"></q-icon>
+                  </q-item-section>
+                  <q-item-section>Recibir alertas por correo</q-item-section>
+                </q-item>
+                <q-item
+                  clickable
+                  v-close-popup
+                  v-else
+                  @click="UpdateReceiveEmails(false)"
+                >
+                  <q-item-section avatar>
+                    <q-icon name="mdi-email-off"></q-icon>
+                  </q-item-section>
+                  <q-item-section>Desactivar alertas por correo</q-item-section>
+                </q-item>
                 <q-item clickable v-close-popup @click="Logout()">
                   <q-item-section avatar>
                     <q-icon name="mdi-logout"></q-icon>
@@ -59,7 +81,8 @@ export default {
   data() {
     return {
       leftDrawerOpen: false,
-      essentialLinks: []
+      essentialLinks: [],
+      isUserReceiveEmails: false
     };
   },
   created() {
@@ -77,7 +100,9 @@ export default {
       }
     }
   },
-  mounted() {},
+  mounted() {
+    this.IsUserReceiveEmails();
+  },
   computed: {
     user() {
       return this.$store.getters["user/getUser"];
@@ -88,6 +113,35 @@ export default {
     }
   },
   methods: {
+    UpdateReceiveEmails(receiveEmails) {
+      request("Auth/UpdateReceiveEmails", {
+        method: "post",
+        data: JSON.stringify({
+          UsersID: this.user.userID,
+          ReceiveEmails: receiveEmails
+        })
+      }).then(response => {
+        this.$q.notify({
+          type: "positive",
+          message: response.message,
+          progress: true
+        });
+        this.IsUserReceiveEmails();
+      });
+    },
+    IsUserReceiveEmails() {
+      request("Auth/IsUserReceiveEmails", {
+        method: "get",
+        params: {
+          userID: this.user.userID
+        }
+      }).then(response => {
+        if (response.code === 1) {
+          this.isUserReceiveEmails = response.receiveEmails;
+          console.log(this.isUserReceiveEmails);
+        }
+      });
+    },
     SaveUser() {
       const userLocalStorage = localStorage.getItem("token");
       const decodedUser = jwtDecode(userLocalStorage);
