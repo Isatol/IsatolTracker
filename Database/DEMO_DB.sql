@@ -204,3 +204,13 @@ BEGIN
 	DELETE FROM Tracking.LastPackageUpdate WHERE PackageID = @PackageID;
 	DELETE FROM Tracking.Package WHERE PackageID = @PackageID;
 END;
+
+GO
+
+CREATE PROCEDURE System.UpdateReceiveEmails
+@UserID INT = NULL,
+@ReceiveEmails bit = null
+AS
+BEGIN
+	UPDATE System.Users SET ReceiveEmails = @ReceiveEmails WHERE UsersID = @UserID
+END;
