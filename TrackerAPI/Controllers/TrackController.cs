@@ -43,7 +43,7 @@ namespace TrackerAPI.Controllers
                             trackingModel = fedex
                         });
                     case 3:
-                        TrackingModel ups = await _track.UPSAsync(trackingNumber, Isatol.Tracker.Track.Locale.en_US);
+                        TrackingModel ups = await _track.UPSAsync(trackingNumber, Isatol.Tracker.Track.Locale.es_MX);
                         return StatusCode(200, new
                         {
                             trackingModel = ups
