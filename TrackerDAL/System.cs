@@ -97,5 +97,16 @@ namespace TrackerDAL
                 await connection.ExecuteAsync("System.AddLog", parameters, commandType: System.Data.CommandType.StoredProcedure);
             }
         }
+
+        public async Task UpdateReceiveEmails(int userID, bool receiveEmails)
+        {
+            using(SqlConnection connection = new SqlConnection(_cs))
+            {
+                DynamicParameters parameters = new DynamicParameters();
+                parameters.Add("UserID", userID);
+                parameters.Add("ReceiveEmails", receiveEmails);
+                await connection.ExecuteAsync("System.UpdateReceiveEmails", parameters, commandType: System.Data.CommandType.StoredProcedure);
+            }
+        }
     }
 }
