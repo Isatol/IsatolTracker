@@ -47,7 +47,38 @@ namespace TrackerAPI.Controllers
                 code = 2
             });
         }
-        
+
+        [HttpGet, Route("[action]")]
+        public async Task<IActionResult> IsUserReceiveEmails(int userID)
+        {
+            TrackerDAL.Models.Users user = await _trackerSystem.GetUser(userID);
+            if(user != null)
+            {
+                return StatusCode(200, new
+                {
+                    code = 1,
+                    receiveEmails = user.ReceiveEmails
+                });
+            }
+            return StatusCode(200, new 
+            {
+                code = 2
+            });
+        }
+
+        [HttpPost, Route("[action]")]
+        public async Task<IActionResult> UpdateReceiveEmails([FromBody] TrackerDAL.Models.Users users)
+        {
+            if (!ModelState.IsValid) return StatusCode(400, ModelState);
+            await _trackerSystem.UpdateReceiveEmails(users.UsersID, users.ReceiveEmails);
+            return StatusCode(200, new 
+            {
+                code = 1,
+                message = users.ReceiveEmails ? "Recibirás notificaciones por correo." : "Dejarás de recibir notificaciones por correo"
+            });
+        }
+
+
         private async Task<JwtSecurityToken> CreateToken(string issuer, string audience, List<Claim> claims, double expirationMinutes, string securityKey)
         {
             return await Task.Run(() => new JwtSecurityToken(
@@ -58,6 +89,6 @@ namespace TrackerAPI.Controllers
                 notBefore: DateTime.Now,
                 signingCredentials: new Microsoft.IdentityModel.Tokens.SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(securityKey)), SecurityAlgorithms.HmacSha256)
                 ));
-        }
+        }        
     }
 }
