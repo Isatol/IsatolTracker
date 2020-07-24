@@ -85,6 +85,16 @@
             flat
           ></q-btn>
         </div>
+        <div class="text-center col-xs-12">
+          <q-btn
+            color="primary"
+            class="btn-primary full-width"
+            label="Registrarme"
+            @click="dialogRegister = true"
+            no-caps
+            flat
+          ></q-btn>
+        </div>
       </div>
 
       <!-- Espaciador -->
@@ -93,25 +103,137 @@
         <br />
       </div>
     </div>
+    <q-dialog v-model="dialogRegister" persistent>
+      <q-card style="max-width: 800px">
+        <q-card-section>
+          <div class="text-h6">Registrarme</div>
+        </q-card-section>
+        <form
+          @reset.prevent.stop="CancelRegister"
+          @submit.prevent.stop="AddUser"
+        >
+          <q-card-section>
+            <q-input
+              label="Nombre"
+              v-model="register.name"
+              hint="Sin apellidos"
+              ref="name"
+              :rules="[rules.requerido]"
+            >
+              <template slot="prepend">
+                <q-icon name="mdi-account"></q-icon>
+              </template>
+            </q-input>
+            <q-input
+              ref="email"
+              label="Correo"
+              v-model="register.email"
+              :rules="[rules.correo, rules.requerido]"
+            >
+              <template slot="prepend">
+                <q-icon name="mdi-at"></q-icon>
+              </template>
+            </q-input>
+            <q-input
+              ref="password"
+              v-model="register.password"
+              :type="ShowPass ? 'password' : 'text'"
+              label="Password"
+              :rules="[rules.requerido]"
+            >
+              <template v-slot:prepend>
+                <q-icon name="mdi-form-textbox-password"></q-icon>
+              </template>
+              <template v-slot:append>
+                <q-icon
+                  :name="ShowPass ? 'mdi-eye' : 'mdi-eye-off'"
+                  @click="ShowPass = !ShowPass"
+                ></q-icon>
+              </template>
+            </q-input>
+          </q-card-section>
+          <q-card-actions align="right">
+            <q-btn label="Cancelar" @click="CancelRegister()" flat></q-btn>
+            <q-btn
+              label="Registrarme"
+              @click="AddUser()"
+              color="primary"
+              flat
+            ></q-btn>
+          </q-card-actions>
+        </form>
+      </q-card>
+    </q-dialog>
   </q-layout>
 </template>
 
 <script>
 import { request } from "@isatol/fetchmodule";
+import { rules } from "../helper/rules";
 export default {
   data() {
     return {
+      rules,
       Usuario: "",
       Password: "",
-      ShowPass: true
+      ShowPass: true,
+      dialogRegister: false,
+      register: {
+        name: "",
+        email: "",
+        password: ""
+      }
     };
   },
-  beforeCreate() {
-    if (localStorage.getItem("token")) {
-      location.replace("home");
-    }
-  },
+  // beforeCreate() {
+  //   if (localStorage.getItem("token")) {
+  //     location.replace("home");
+  //   }
+  // },
   methods: {
+    AddUser() {
+      this.$refs.name.validate();
+      this.$refs.email.validate();
+      this.$refs.password.validate();
+      if (
+        this.$refs.name.hasError ||
+        this.$refs.email.hasError ||
+        this.$refs.password.hasError
+      ) {
+        this.$q.notify({
+          message: "Complete el formulario, por favor",
+          type: "negative",
+          progress: true
+        });
+      } else {
+        request("Auth/AddUser", {
+          method: "post",
+          data: JSON.stringify(this.register)
+        }).then(res => {
+          if (res.code === 1) {
+            this.$q.notify({
+              message: res.message,
+              type: "positive",
+              progress: true
+            });
+            this.CancelRegister();
+          } else {
+            this.$q.notify({
+              message: res.message,
+              type: "negative",
+              progress: true
+            });
+          }
+        });
+      }
+    },
+    CancelRegister() {
+      this.register.name = null;
+      this.register.email = null;
+      this.register.password = null;
+      this.dialogRegister = false;
+      this.$refs.email.resetValidation();
+    },
     Login(user, password) {
       request("Auth/Login", {
         method: "post",

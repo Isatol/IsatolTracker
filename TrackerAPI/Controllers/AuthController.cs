@@ -78,6 +78,30 @@ namespace TrackerAPI.Controllers
             });
         }
 
+        [HttpPost, Route("[action]")]
+        public async Task<IActionResult> AddUser([FromBody] TrackerDAL.Models.Users users)
+        {
+            if (!ModelState.IsValid) return StatusCode(400, ModelState);
+            TrackerDAL.Models.Users user = await _trackerSystem.GetUser(users.Email);
+            if(user == null)
+            {
+                await _trackerSystem.AddUser(users);
+                return StatusCode(200, new
+                {
+                    code = 1,
+                    message = "Registrado con éxito"
+                });
+            }
+            else
+            {
+                return StatusCode(200, new
+                {
+                    code = 2,
+                    message = "Correo electrónico ya existe"
+                });
+            }
+        }
+
 
         private async Task<JwtSecurityToken> CreateToken(string issuer, string audience, List<Claim> claims, double expirationMinutes, string securityKey)
         {

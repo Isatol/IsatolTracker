@@ -10,28 +10,30 @@
           <q-btn icon="mdi-account" :label="`Hola ${user.name}`">
             <q-menu>
               <q-list style="mint-width: 100px">
-                <q-item
-                  clickable
-                  v-close-popup
-                  v-if="!thereIsASubscription"
-                  @click="PermitirNotificaciones()"
-                >
-                  <q-item-section avatar>
-                    <q-icon name="mdi-bell-ring"></q-icon>
-                  </q-item-section>
-                  <q-item-section>Permitir notificaciones</q-item-section>
-                </q-item>
-                <q-item
-                  clickable
-                  v-close-popup
-                  v-else
-                  @click="EliminarSuscripcion()"
-                >
-                  <q-item-section avatar>
-                    <q-icon name="mdi-bell-off"></q-icon>
-                  </q-item-section>
-                  <q-item-section>Desactivar notificaciones</q-item-section>
-                </q-item>
+                <div v-if="isNotificationPermited">
+                  <q-item
+                    clickable
+                    v-close-popup
+                    v-if="!thereIsASubscription"
+                    @click="PermitirNotificaciones()"
+                  >
+                    <q-item-section avatar>
+                      <q-icon name="mdi-bell-ring"></q-icon>
+                    </q-item-section>
+                    <q-item-section>Permitir notificaciones</q-item-section>
+                  </q-item>
+                  <q-item
+                    clickable
+                    v-close-popup
+                    v-else
+                    @click="EliminarSuscripcion()"
+                  >
+                    <q-item-section avatar>
+                      <q-icon name="mdi-bell-off"></q-icon>
+                    </q-item-section>
+                    <q-item-section>Desactivar notificaciones</q-item-section>
+                  </q-item>
+                </div>
                 <q-item
                   clickable
                   v-close-popup
@@ -88,22 +90,26 @@ export default {
   created() {
     this.SaveUser();
   },
-  beforeCreate() {
-    if (!localStorage.getItem("token")) {
-      this.$router.replace("/");
-    } else {
-      const jwt = jwtDecode(localStorage.getItem("token"));
-      const now = new Date();
-      const expToken = new Date(1000 * jwt.exp);
-      if (now > expToken) {
-        this.$router.replace("/");
-      }
-    }
-  },
+  // beforeCreate() {
+  //   if (!localStorage.getItem("token")) {
+  //     this.$router.replace("/");
+  //   } else {
+  //     const jwt = jwtDecode(localStorage.getItem("token"));
+  //     const now = new Date();
+  //     const expToken = new Date(1000 * jwt.exp);
+  //     if (now > expToken) {
+  //       this.$router.replace("/");
+  //     }
+  //   }
+  // },
   mounted() {
     this.IsUserReceiveEmails();
   },
   computed: {
+    isNotificationPermited() {
+      if (window.Notification) return true;
+      return false;
+    },
     user() {
       return this.$store.getters["user/getUser"];
     },

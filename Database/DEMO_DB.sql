@@ -214,3 +214,23 @@ AS
 BEGIN
 	UPDATE System.Users SET ReceiveEmails = @ReceiveEmails WHERE UsersID = @UserID
 END;
+
+GO
+
+CREATE PROCEDURE System.AddUser
+@Email varchar(max) = NULL,
+@Name varchar(max) = NULL,
+@Password varchar(max) = NULL
+AS
+BEGIN
+	INSERT INTO System.Users (Email, Name, Password, ReceiveEmails) VALUES (@Email, @Name, @Password, 0)
+END;
+
+GO
+
+CREATE PROCEDURE System.GetUserByEmail
+@Email varchar(max) = NULL
+AS
+BEGIN
+	SELECT u.Email, u.UsersID, u.Name FROM System.Users u WHERE u.Email = @Email
+END;

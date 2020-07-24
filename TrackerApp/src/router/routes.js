@@ -2,6 +2,7 @@ import TrackingDetails from "pages/TrackingDetails.vue";
 const routes = [
   {
     path: "/",
+    name: "login",
     // component: () => import("layouts/MainLayout.vue")
     component: () => import("pages/Login.vue")
     // children: [{ path: "", component: () => import("pages/Index.vue") }]
@@ -12,6 +13,7 @@ const routes = [
     children: [
       {
         path: "",
+        name: "home",
         component: () => import("pages/Index.vue"),
         children: [
           {

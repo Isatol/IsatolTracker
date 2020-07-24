@@ -67,7 +67,7 @@ module.exports = {
     "vue/valid-v-for": "off",
     "vue/no-parsing-error": "off",
     "vue/valid-v-bind": "off",
-
+    "no-unused-vars": "off",
     // allow debugger during development only
     "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off"
   }
