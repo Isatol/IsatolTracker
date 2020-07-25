@@ -10,6 +10,8 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Mime;
 using System.Web;
+using Tracker.Models.DHL;
+using static Isatol.Tracker.Track;
 
 namespace Isatol.Tracker
 {
@@ -150,6 +152,40 @@ namespace Isatol.Tracker
 
                 throw ex;
             }            
+        }
+
+        public static async Task<DHLResponse> GetDHLResponse(string trackingNumber, HttpClient client, Locale locale)
+        {
+            string uri = null;
+            string uri2 = null;
+            switch (locale)
+            {
+                case Locale.es_MX:
+                    uri = $"https://www.dhl.com/utapi?trackingNumber={trackingNumber}&language=es&requesterCountryCode=MX";
+                    uri2 = $"https://api-eu.dhl.com/track/shipments?trackingNumber={trackingNumber}&requesterCountryCode=ES&originCountryCode=MX&language=es";
+                    break;
+                case Locale.en_US:
+                    uri = $"https://www.dhl.com/utapi?trackingNumber={trackingNumber}&language=en&requesterCountryCode=US";
+                    uri2 = $"https://api-eu.dhl.com/track/shipments?trackingNumber={trackingNumber}&requesterCountryCode=US&originCountryCode=US&language=en";
+                    break;
+            }    
+                        
+            HttpRequestMessage request = new HttpRequestMessage
+            {
+                RequestUri = new Uri(uri2),
+                Headers =
+                    {
+                    // User-Agent testing purpouse
+                    // {"User-Agent",  "PostmanRuntime/7.26.1" },                    
+                    {"DHL-API-Key", "demo-key" },
+                    {"Connection", "keep-alive" },                    
+                    },
+                Method = HttpMethod.Get
+            };
+            var response = await client.SendAsync(request);            
+            string responseMessage = await response.Content.ReadAsStringAsync();
+            DHLResponse dHLResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<DHLResponse>(responseMessage);
+            return dHLResponse;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Isatol.Tracker.Models;
@@ -47,6 +48,12 @@ namespace TrackerAPI.Controllers
                         return StatusCode(200, new
                         {
                             trackingModel = ups
+                        });
+                    case 4:
+                        TrackingModel dhl = await _track.DHLAsync(trackingNumber, Isatol.Tracker.Track.Locale.es_MX);
+                        return StatusCode(200, new 
+                        {
+                            trackingModel = dhl
                         });
                     default:
                         return StatusCode(200, new

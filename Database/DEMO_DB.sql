@@ -90,7 +90,7 @@ CREATE PROCEDURE System.Login
 @Password varchar(max) = null
 AS
 BEGIN
-	SELECT u.Email, u.Name, u.UsersID FROM System.Users u WHERE u.Email = @Email AND u.Password = @Password
+	SELECT u.Email, u.Name, u.UsersID, u.Password FROM System.Users u WHERE u.Email = @Email AND u.Password = @Password
 END;
 
 GO
@@ -232,5 +232,5 @@ CREATE PROCEDURE System.GetUserByEmail
 @Email varchar(max) = NULL
 AS
 BEGIN
-	SELECT u.Email, u.UsersID, u.Name FROM System.Users u WHERE u.Email = @Email
+	SELECT u.Email, u.UsersID, u.Name, u.Password FROM System.Users u WHERE u.Email = @Email
 END;

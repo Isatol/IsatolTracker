@@ -6,7 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Isatol.Tracker" Version="1.1.0" />
+    <PackageReference Include="BouncyCastle" Version="1.8.6.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Tracker\Tracker\Tracker.csproj" />
   </ItemGroup>
 
 </Project>

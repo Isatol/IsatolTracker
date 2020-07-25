@@ -26,7 +26,8 @@ namespace TrackerAPI.Controllers
         public async Task<IActionResult> Login([FromBody] Models.Auth auth) 
         {
             if (!ModelState.IsValid) return StatusCode(400, ModelState);
-            TrackerDAL.Models.Users user =  await _trackerSystem.Login(auth.Email, auth.Password);
+            string passwordEncrypted = Helper.Crypto.AES.Encrypt(auth.Password);
+            TrackerDAL.Models.Users user =  await _trackerSystem.Login(auth.Email, passwordEncrypted);
             if(user != null)
             {
                 string jti = Guid.NewGuid().ToString();
@@ -85,6 +86,8 @@ namespace TrackerAPI.Controllers
             TrackerDAL.Models.Users user = await _trackerSystem.GetUser(users.Email);
             if(user == null)
             {
+                string passwordEncrypted = Helper.Crypto.AES.Encrypt(users.Password);
+                users.Password = passwordEncrypted;
                 await _trackerSystem.AddUser(users);
                 return StatusCode(200, new
                 {

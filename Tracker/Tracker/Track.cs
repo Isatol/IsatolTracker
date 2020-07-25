@@ -10,6 +10,7 @@ using System.Linq.Expressions;
 using System.Net.Http.Formatting;
 using System.Web;
 using System.Globalization;
+using Tracker.Models.DHL;
 
 namespace Isatol.Tracker
 {
@@ -273,6 +274,54 @@ namespace Isatol.Tracker
                 trackingModel.EstimateDelivery = await Helper.GetEstafetaEstimateDelivery(document);
                 List<TrackingDetails> trackingDetails = await Helper.GetEstafetaTrackingDetails(document);
                 trackingModel.TrackingDetails.AddRange(trackingDetails);
+            }
+            return trackingModel;
+        }
+
+        public Models.TrackingModel DHL(string trackingNumber, Locale locale)
+        {            
+            DHLResponse dhl = Helper.GetDHLResponse(trackingNumber, _httpClient, locale).Result;
+            TrackingModel trackingModel = new TrackingModel();
+            trackingModel.TrackingDetails = new List<TrackingDetails>();
+            if(dhl != null)
+            {
+                Shipments shipments = dhl.Shipments[0];
+                trackingModel.Delivered = shipments.Status.StatusCode == "delivered";
+                trackingModel.Status = shipments.Status.Status;
+                shipments.Events.ForEach(e => 
+                {
+                    TrackingDetails trackingDetails = new TrackingDetails
+                    {
+                        Date = Convert.ToDateTime(e.Timestamp),
+                        Event = e.Status,
+                        Messages = e.Location.Address.AddressLocality
+                    };
+                    trackingModel.TrackingDetails.Add(trackingDetails);
+                });
+            }
+            return trackingModel;
+        }
+
+        public async Task<Models.TrackingModel> DHLAsync(string trackingNumber, Locale locale)
+        {
+            DHLResponse dhl = await Helper.GetDHLResponse(trackingNumber, _httpClient, locale);
+            TrackingModel trackingModel = new TrackingModel();
+            trackingModel.TrackingDetails = new List<TrackingDetails>();
+            if (dhl != null)
+            {
+                Shipments shipments = dhl.Shipments[0];
+                trackingModel.Delivered = shipments.Status.StatusCode == "delivered";
+                trackingModel.Status = shipments.Status.Status;
+                shipments.Events.ForEach(e =>
+                {
+                    TrackingDetails trackingDetails = new TrackingDetails
+                    {
+                        Date = Convert.ToDateTime(e.Timestamp),
+                        Event = e.Status,
+                        Messages = e.Location.Address.AddressLocality
+                    };
+                    trackingModel.TrackingDetails.Add(trackingDetails);
+                });
             }
             return trackingModel;
         }

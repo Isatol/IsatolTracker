@@ -165,6 +165,46 @@ namespace TrackerAPI.Worker
                                 }
                             }
                             break;
+                        case 4:
+                            Isatol.Tracker.Models.TrackingModel dhl = await _track.DHLAsync(p.TrackingNumber, Track.Locale.es_MX);
+//#if DEBUG
+//                            dhl.TrackingDetails.Insert(0, new Isatol.Tracker.Models.TrackingDetails
+//                            {
+//                                Date = DateTime.Now,
+//                                Event = "En proceso en ir a la casa",
+//                                Messages = ""
+//                            });
+//#endif
+
+                            if (lastPackageUpdate == null)
+                            {
+                                await _tracking.InsertLastPackageUpdate(new TrackerDAL.Models.LastPackageUpdate 
+                                {
+                                    Date = dhl.TrackingDetails[0].Date,
+                                    Event = dhl.TrackingDetails[0].Event,
+                                    PackageID = p.PackageID
+                                });
+                            }
+                            else if(lastPackageUpdate.Date != dhl.TrackingDetails[0].Date)
+                            {
+                                await SendPushNotification(p.UsersID, company.Name, company.Logo, p.Name, $"{dhl.TrackingDetails[0].Event} {dhl.TrackingDetails[0].Messages}");
+                                await _tracking.UpdateLastPackage(new TrackerDAL.Models.LastPackageUpdate 
+                                {
+                                    Date = dhl.TrackingDetails[0].Date,
+                                    Event = dhl.TrackingDetails[0].Event,
+                                    PackageID = p.PackageID
+                                });
+                                if (user.ReceiveEmails)
+                                {
+                                    await SendEmailNotification(user.Email, new Dictionary<string, string>
+                                       {
+                                           {"#nombre#", user.Name },
+                                           {"#paquete#", p.Name },
+                                           {"#evento#", $"{dhl.TrackingDetails[0].Event} {dhl.TrackingDetails[0].Messages}" }
+                                       }, template, true);
+                                }
+                            }
+                            break;
                     }                    
                 });
             }
