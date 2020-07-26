@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Isatol.Tracker.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using TrackerDAL.Models;
 
 namespace TrackerAPI.Controllers
 {
@@ -28,39 +29,12 @@ namespace TrackerAPI.Controllers
         public async Task<IActionResult> GetTrackingModel(int companyID, string trackingNumber)
         {
             try
-            {                
-                switch (companyID)
+            {
+                TrackingModel trackingModel = await GetPackages(companyID, trackingNumber);
+                return StatusCode(200, new
                 {
-                    case 1:
-                        TrackingModel estafeta = await _track.EstafetaAsync(trackingNumber);
-                        return StatusCode(200, new
-                        {
-                            trackingModel = estafeta
-                        });
-                    case 2:
-                        TrackingModel fedex = await _track.FedexAsync(trackingNumber);
-                        return StatusCode(200, new
-                        {
-                            trackingModel = fedex
-                        });
-                    case 3:
-                        TrackingModel ups = await _track.UPSAsync(trackingNumber, Isatol.Tracker.Track.Locale.es_MX);
-                        return StatusCode(200, new
-                        {
-                            trackingModel = ups
-                        });
-                    case 4:
-                        TrackingModel dhl = await _track.DHLAsync(trackingNumber, Isatol.Tracker.Track.Locale.es_MX);
-                        return StatusCode(200, new 
-                        {
-                            trackingModel = dhl
-                        });
-                    default:
-                        return StatusCode(200, new
-                        {
-                            message = "No company selected"
-                        });
-                }
+                    trackingModel = trackingModel
+                });
             }
             catch (Exception ex)
             {                
@@ -113,7 +87,14 @@ namespace TrackerAPI.Controllers
         public async Task<IActionResult> InsertPackage([FromBody] TrackerDAL.Models.Package package)
         {
             if (!ModelState.IsValid) return StatusCode(400, ModelState);
-            await _tracking.InsertPackage(package);
+            var packages = await GetPackages(package.CompanyID, package.TrackingNumber);
+            LastPackageUpdate lastPackageUpdate = new LastPackageUpdate();
+            if (packages.TrackingDetails.Count > 0) 
+            {
+                lastPackageUpdate.Date = packages.TrackingDetails[0].Date;
+                lastPackageUpdate.Event = packages.TrackingDetails[0].Event;
+            }                
+            await _tracking.InsertPackage(package, lastPackageUpdate);
             return StatusCode(200, new 
             {
                 code = 1,
@@ -141,6 +122,27 @@ namespace TrackerAPI.Controllers
                 code = 1,
                 messages = "Paquete eliminado"
             });
+        }
+
+        public async Task<TrackingModel> GetPackages(int companyID, string trackingNumber)
+        {
+            switch (companyID)
+            {
+                case 1:
+                    TrackingModel estafeta = await _track.EstafetaAsync(trackingNumber);
+                    return estafeta;
+                case 2:
+                    TrackingModel fedex = await _track.FedexAsync(trackingNumber);
+                    return fedex;
+                case 3:
+                    TrackingModel ups = await _track.UPSAsync(trackingNumber, Isatol.Tracker.Track.Locale.es_MX);
+                    return ups;
+                case 4:
+                    TrackingModel dhl = await _track.DHLAsync(trackingNumber, Isatol.Tracker.Track.Locale.es_MX);
+                    return dhl;
+                default:
+                    return default;
+            }
         }
     }
 }

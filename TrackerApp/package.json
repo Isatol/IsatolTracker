@@ -14,7 +14,8 @@
     "@quasar/extras": "^1.0.0",
     "core-js": "^3.6.5",
     "jwt-decode": "^2.2.0",
-    "quasar": "^1.0.0"
+    "quasar": "^1.0.0",
+    "vue-gtag": "^1.8.0"
   },
   "devDependencies": {
     "@quasar/app": "^2.0.0",

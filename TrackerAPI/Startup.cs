@@ -63,7 +63,7 @@ namespace TrackerAPI
             services.Configure<Models.EmailSettings>(Configuration.GetSection("EmailSettings"));
             services.AddHttpClient<Isatol.Tracker.Track>("Tracker");
             services.AddHttpClient<PushServiceClient>("PushServiceClient");
-            services.AddHostedService<Worker.Worker>();
+            //services.AddHostedService<Worker.Worker>();
             services.AddControllers();
         }
 

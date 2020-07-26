@@ -7,3 +7,9 @@ Tracker/Tracker/obj/
 TrackerAPI/bin/
 TrackerAPI/obj/
 TrackerApp/node_modules/
+TrackerDAL/bin/
+TrackerDAL/obj/
+PackageWorker/bin/
+PackageWorker/obj/
+PackageWorker/Properties/PublishProfiles/
+TrackerAPI/Properties/PublishProfiles/

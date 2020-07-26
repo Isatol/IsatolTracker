@@ -304,26 +304,35 @@ namespace Isatol.Tracker
 
         public async Task<Models.TrackingModel> DHLAsync(string trackingNumber, Locale locale)
         {
-            DHLResponse dhl = await Helper.GetDHLResponse(trackingNumber, _httpClient, locale);
             TrackingModel trackingModel = new TrackingModel();
             trackingModel.TrackingDetails = new List<TrackingDetails>();
-            if (dhl != null)
+            try
             {
-                Shipments shipments = dhl.Shipments[0];
-                trackingModel.Delivered = shipments.Status.StatusCode == "delivered";
-                trackingModel.Status = shipments.Status.Status;
-                shipments.Events.ForEach(e =>
+                DHLResponse dhl = await Helper.GetDHLResponse(trackingNumber, _httpClient, locale);                
+                if(dhl.Shipments != null)
                 {
-                    TrackingDetails trackingDetails = new TrackingDetails
+                    Shipments shipments = dhl.Shipments[0];
+                    trackingModel.Delivered = shipments.Status.StatusCode == "delivered";
+                    trackingModel.Status = shipments.Status.Status;
+                    shipments.Events.ForEach(e =>
                     {
-                        Date = Convert.ToDateTime(e.Timestamp),
-                        Event = e.Status,
-                        Messages = e.Location.Address.AddressLocality
-                    };
-                    trackingModel.TrackingDetails.Add(trackingDetails);
-                });
+                        TrackingDetails trackingDetails = new TrackingDetails
+                        {
+                            Date = Convert.ToDateTime(e.Timestamp),
+                            Event = e.Status,
+                            Messages = e.Location.Address.AddressLocality
+                        };
+                        trackingModel.TrackingDetails.Add(trackingDetails);
+                    });                    
+                }
+                return trackingModel;
             }
-            return trackingModel;
+            catch (Exception ex)
+            {
+
+                return trackingModel;
+            }
+
         }
     }
 }

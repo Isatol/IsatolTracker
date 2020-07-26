@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestTracker", "TestTracker\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TrackerAPI", "TrackerAPI\TrackerAPI.csproj", "{5BA29254-3139-48D1-B0CD-2E14D3C41B12}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrackerDAL", "TrackerDAL\TrackerDAL.csproj", "{0F8D17A9-B38C-4258-B450-798166EC7FFC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TrackerDAL", "TrackerDAL\TrackerDAL.csproj", "{0F8D17A9-B38C-4258-B450-798166EC7FFC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PackageWorker", "PackageWorker\PackageWorker.csproj", "{1A8DA704-1160-4F5F-B3CE-4C10F71706F3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{0F8D17A9-B38C-4258-B450-798166EC7FFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0F8D17A9-B38C-4258-B450-798166EC7FFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0F8D17A9-B38C-4258-B450-798166EC7FFC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A8DA704-1160-4F5F-B3CE-4C10F71706F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A8DA704-1160-4F5F-B3CE-4C10F71706F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A8DA704-1160-4F5F-B3CE-4C10F71706F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A8DA704-1160-4F5F-B3CE-4C10F71706F3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -79,7 +79,7 @@ namespace TrackerDAL
             }
         }
 
-        public async Task InsertPackage(Package package)
+        public async Task InsertPackage(Package package, LastPackageUpdate lastPackageUpdate)
         {
             using(SqlConnection connection = new SqlConnection(_cs))
             {
@@ -88,6 +88,8 @@ namespace TrackerDAL
                 parameters.Add("TrackingNumber", package.TrackingNumber);
                 parameters.Add("UsersID", package.UsersID);
                 parameters.Add("Name", package.Name);
+                parameters.Add("LastDate", lastPackageUpdate.Date);
+                parameters.Add("LastEvent", lastPackageUpdate.Event);
                 await connection.ExecuteAsync("Tracking.InsertPackage", parameters, commandType: System.Data.CommandType.StoredProcedure);
             }
         }

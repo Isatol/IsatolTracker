@@ -99,10 +99,15 @@ CREATE PROCEDURE Tracking.InsertPackage
 @CompanyID INT = NULL,
 @TrackingNumber varchar(max),
 @UsersID INT = NULL,
-@Name varchar(100) = NULL
+@Name varchar(100) = NULL,
+@LastDate DATETIME = NULL,
+@LastEvent VARCHAR(MAX) = NULL
 AS
 BEGIN
+DECLARE @PackageID INT = NULL;
 	INSERT INTO Tracking.Package (CompanyID, TrackingNumber, Name, UsersID) VALUES (@CompanyID, @TrackingNumber, @Name,  @UsersID)
+	SELECT @PackageID = SCOPE_IDENTITY()
+	INSERT INTO Tracking.LastPackageUpdate (Date, Event, PackageID) VALUES (@LastDate, @LastEvent, @PackageID)
 END;
 
 GO
