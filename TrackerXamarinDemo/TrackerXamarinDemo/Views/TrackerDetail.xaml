@@ -1,0 +1,134 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="TrackerXamarinDemo.Views.TrackerDetail"
+             Title="{Binding Title}">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Command="{Binding DeletePackage}">
+            <ToolbarItem.IconImageSource>
+                <FontImageSource Glyph="&#xf1f8;" Size="20">
+                    <FontImageSource.FontFamily>
+                        <OnPlatform x:TypeArguments="x:String"
+                                        Android="Font Awesome 5 Free-Solid-900.otf#Font Awesome 5 Free Solid"
+                                        iOS="Font Awesome 5 Free" 
+                                        ></OnPlatform>
+                    </FontImageSource.FontFamily>
+                </FontImageSource>
+            </ToolbarItem.IconImageSource>
+        </ToolbarItem>
+    </ContentPage.ToolbarItems>
+    <ContentPage.Content>
+        <StackLayout >
+            <BoxView Color="Transparent" HeightRequest="5"></BoxView>
+            <AbsoluteLayout   IsVisible="{Binding IsBusy}">
+                <Grid AbsoluteLayout.LayoutFlags="All" AbsoluteLayout.LayoutBounds="0,1,1,1">
+                    <ActivityIndicator  HorizontalOptions="Center" Color="CornflowerBlue" HeightRequest="600" WidthRequest="80" AbsoluteLayout.LayoutFlags="PositionProportional" AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1" VerticalOptions="Center" IsRunning="{Binding IsBusy}"/>
+                </Grid>
+            </AbsoluteLayout>
+            <Frame IsVisible="{Binding IsVisiblePage}" Padding="20" BackgroundColor="#3494D5" HorizontalOptions="Center" HasShadow="True" CornerRadius="5" IsClippedToBounds="True">
+                <Grid HeightRequest="200" WidthRequest="350" x:Name="GridDetails">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="0"></RowDefinition>
+                        <RowDefinition Height="20"></RowDefinition>
+                        <RowDefinition Height="40"></RowDefinition>
+                        <RowDefinition Height="20"></RowDefinition>
+                        <RowDefinition Height="40"></RowDefinition>
+                        <RowDefinition Height="20"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="40"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+
+                    <!--Muestra si está entregado el paquete-->
+                    <Label x:Name="LblDeliveredIcon" IsVisible="{Binding IsVisibleDelivered}" Text="&#xf49e;" TextColor="White" FontSize="Medium" Grid.Row="1">
+                        <Label.FontFamily>
+                            <OnPlatform x:TypeArguments="x:String"
+                                        Android="Font Awesome 5 Free-Solid-900.otf#Font Awesome 5 Free Solid"
+                                        iOS="Font Awesome 5 Free" 
+                                        ></OnPlatform>
+                        </Label.FontFamily>
+                    </Label>
+                    <Label Grid.Row="1" IsVisible="{Binding IsVisibleDelivered}" x:Name="lblDeliveredTitle" Text="Entregado" Grid.Column="1" TextColor="White" FontSize="Medium" FontAttributes="Bold"></Label>
+                    <Label Grid.Row="2" IsVisible="{Binding IsVisibleDelivered}" Grid.Column="1" x:Name="lblDeliveredText" Text="Tu paquete fue entregado" FontSize="Caption" TextColor="White"></Label>
+                    <!--**********-->
+
+                    <!--Muestra si el paquete sigue en camino-->
+                    <Label IsVisible="{Binding IsVisibleInTransit}" Text="&#xf0d1;" TextColor="White" FontSize="Medium" Grid.Row="1">
+                        <Label.FontFamily>
+                            <OnPlatform x:TypeArguments="x:String"
+                                        Android="Font Awesome 5 Free-Solid-900.otf#Font Awesome 5 Free Solid"
+                                        iOS="Font Awesome 5 Free" 
+                                        ></OnPlatform>
+                        </Label.FontFamily>
+                    </Label>
+                    <Label Grid.Row="1" IsVisible="{Binding IsVisibleInTransit}" Text="En tránsito" Grid.Column="1" TextColor="White" FontSize="Medium" FontAttributes="Bold"></Label>
+                    <Label Grid.Row="2" IsVisible="{Binding IsVisibleInTransit}" Grid.Column="1" Text="Tu paquete viene en camino" FontSize="Caption" TextColor="White"></Label>
+                    <!--***************-->
+
+
+                    <Label Text="&#xf48b;" TextColor="White" FontSize="Medium" Grid.Row="3">
+                        <Label.FontFamily>
+                            <OnPlatform x:TypeArguments="x:String"
+                                        Android="Font Awesome 5 Free-Solid-900.otf#Font Awesome 5 Free Solid"
+                                        iOS="Font Awesome 5 Free" 
+                                        ></OnPlatform>
+                        </Label.FontFamily>
+                    </Label>
+                    <Label Grid.Row="3"  Text="Estado actual" Grid.Column="1" TextColor="White" FontSize="Medium" FontAttributes="Bold"></Label>
+                    <Label Grid.Row="4" Text="{Binding CurrentStatus}"  Grid.Column="1" TextColor="White" FontSize="Caption"></Label>
+
+
+                    <Label Text="&#xf783;" Grid.Row="5" TextColor="White" FontSize="Medium">
+                        <Label.FontFamily>
+                            <OnPlatform x:TypeArguments="x:String"
+                                        Android="Font Awesome 5 Free-Solid-900.otf#Font Awesome 5 Free Solid"
+                                        iOS="Font Awesome 5 Free" 
+                                        ></OnPlatform>
+                        </Label.FontFamily>
+                    </Label>
+                    <Label Grid.Row="5" Grid.Column="1" Text="Fecha estimada de llegada" TextColor="White" FontSize="Medium" FontAttributes="Bold"></Label>
+                    <Label Grid.Row="6" Grid.Column="1" Text="{Binding EstimateDeliveryDate}" TextColor="White" FontSize="Caption" ></Label>
+                </Grid>
+            </Frame>
+            <ScrollView IsVisible="{Binding IsVisiblePage}">
+                <StackLayout HorizontalOptions="FillAndExpand">
+                    <CollectionView ItemsSource="{Binding TrackingDetails}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <StackLayout VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
+                                    <BoxView Color="Transparent" HeightRequest="3"></BoxView>
+                                    <Frame Padding="20" HorizontalOptions="Center" HasShadow="True" CornerRadius="5" IsClippedToBounds="True">
+                                        <Grid HeightRequest="160" WidthRequest="350">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="0"></RowDefinition>
+                                                <RowDefinition Height="20"></RowDefinition>
+                                                <RowDefinition Height="20"></RowDefinition>
+                                                <RowDefinition Height="20"></RowDefinition>
+                                                <RowDefinition Height="20"></RowDefinition>
+                                                <RowDefinition Height="*"></RowDefinition>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="600"></ColumnDefinition>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Text="Fecha" Grid.Row="1" FontSize="Body" FontAttributes="Bold"></Label>
+                                            <Label Text="{Binding Date, StringFormat='{0:dd-MM-yyyy HH:mm}'}" Grid.Row="2" FontSize="Caption"></Label>
+                                            <Label Text="Evento" Grid.Row="3" FontSize="Body" FontAttributes="Bold"></Label>
+                                            <Label Text="{Binding Event}" Grid.Row="4" FontSize="Caption"></Label>
+                                            <Label Text="Adicionales" Grid.Row="5" FontAttributes="Bold" FontSize="Body"></Label>
+                                            <ScrollView Grid.Row="6" Orientation="Horizontal">
+                                                <Label Text="{Binding Messages}" FontSize="Caption"></Label>
+                                            </ScrollView>
+                                        </Grid>
+                                    </Frame>
+                                </StackLayout>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </StackLayout>
+            </ScrollView>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

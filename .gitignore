@@ -13,3 +13,9 @@ PackageWorker/bin/
 PackageWorker/obj/
 PackageWorker/Properties/PublishProfiles/
 TrackerAPI/Properties/PublishProfiles/
+TrackerXamarinDemo/TrackerXamarinDemo/bin/
+TrackerXamarinDemo/TrackerXamarinDemo/obj/
+TrackerXamarinDemo/TrackerXamarinDemo.Android/bin/
+TrackerXamarinDemo/TrackerXamarinDemo.Android/obj/
+TrackerXamarinDemo/TrackerXamarinDemo.iOS/bin/
+TrackerXamarinDemo/TrackerXamarinDemo.iOS/obj/

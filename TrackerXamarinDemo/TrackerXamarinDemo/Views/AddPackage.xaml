@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="TrackerXamarinDemo.Views.AddPackage">
+    <ContentPage.Content>
+        <StackLayout>
+            <Frame HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" Padding="20" HasShadow="True" CornerRadius="15" IsClippedToBounds="True">
+                <Grid HeightRequest="420" WidthRequest="350">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="2"></RowDefinition>
+                        <RowDefinition Height="2*"></RowDefinition>
+                        <RowDefinition Height="2*"></RowDefinition>
+                        <RowDefinition Height="2*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <StackLayout Grid.Row="1"  Spacing="2">
+                        <Label Text="Número de rastreo"></Label>
+                        <Entry Text="{Binding TrackingNumber}" WidthRequest="300" ></Entry>
+                    </StackLayout>
+                    <StackLayout Grid.Row="2">
+                        <Label Text="Nombre del paquete"></Label>
+                        <Entry Text="{Binding PackageName}" WidthRequest="300"></Entry>
+                        <Label Text="Opcional" FontSize="Caption"></Label>
+                    </StackLayout>
+                    <StackLayout Grid.Row="3">
+                        <Label Text="Selecciona una paquetería"></Label>
+                        <Picker Title="Paquetería" HorizontalOptions="CenterAndExpand" WidthRequest="350"  x:Name="CompaniesPicker" ItemsSource="{Binding Companies}" SelectedItem="{Binding CompanyID}" ItemDisplayBinding="{Binding Name}" SelectedIndexChanged="Picker_SelectedIndexChanged">
+                        </Picker>
+                    </StackLayout>
+                    <StackLayout Grid.Row="4" Spacing="2">
+                        <Button Command="{Binding AddPackageCommand}" Clicked="Button_Clicked" Text="Agregar" BackgroundColor="CornflowerBlue" CornerRadius="15" TextColor="White"></Button>
+                    </StackLayout>
+                </Grid>
+            </Frame>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

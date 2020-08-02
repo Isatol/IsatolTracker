@@ -71,7 +71,7 @@ namespace PackageWorker
                     {
                         case 1:
                             Isatol.Tracker.Models.TrackingModel estafeta = await _track.EstafetaAsync(p.TrackingNumber);
-//#if DEBUG
+#if DEBUG
                             if (p.UsersID == 1)
                             {
                                 estafeta.TrackingDetails.Insert(0, new Isatol.Tracker.Models.TrackingDetails
@@ -81,7 +81,7 @@ namespace PackageWorker
                                     Messages = ""
                                 });
                             }
-//#endif
+#endif
                             if (lastPackageUpdate == null && estafeta.TrackingDetails.Count > 0)
                             {
                                 await _tracking.InsertLastPackageUpdate(new TrackerDAL.Models.LastPackageUpdate

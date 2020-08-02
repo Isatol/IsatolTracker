@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "740780399105",
+    "firebase_url": "https://isatol-package-tracker-app.firebaseio.com",
+    "project_id": "isatol-package-tracker-app",
+    "storage_bucket": "isatol-package-tracker-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:740780399105:android:06dbc3be724936746dfe00",
+        "android_client_info": {
+          "package_name": "com.isatol.packagetracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "740780399105-54pur10s6pqpj1gg9jui25pdaohhjqa7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKZ4xX5_HdgYULfI3OvEbH3RC7O4ojn4A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "740780399105-54pur10s6pqpj1gg9jui25pdaohhjqa7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -17,7 +17,7 @@ namespace Isatol.Tracker
     /// <summary>
     /// Contains methods to track packages
     /// </summary>
-    public class Track
+    public class Track    
     {
         /// <summary>
         /// Response language
@@ -169,39 +169,42 @@ namespace Isatol.Tracker
             trackingModel.TrackingDetails = new List<TrackingDetails>();
             if (uPSResponse.StatusCode == "200")
             {
-                var trackDetails = uPSResponse.TrackDetails[0];
-                trackingModel.Delivered = trackDetails.PackageStatusType == "D";
-                trackingModel.Status = trackDetails.PackageStatus;
-                if (DateTime.TryParse(trackDetails.EstimatedArrival, out DateTime estimatedArrival))
+                if (uPSResponse.TrackDetails[0].PackageStatus != null)
                 {
-                    trackingModel.EstimateDelivery = estimatedArrival;
-                }
-                trackDetails.ShipmentProgressActivities.ForEach(activity =>
-                {
-                    DateTime? scanDate = null; 
-                    if (activity.Date != null && activity.Time != null)
+                    var trackDetails = uPSResponse.TrackDetails[0];
+                    trackingModel.Delivered = trackDetails.PackageStatusType == "D";
+                    trackingModel.Status = trackDetails.PackageStatus;
+                    if (DateTime.TryParse(trackDetails.EstimatedArrival, out DateTime estimatedArrival))
                     {
-                        if (locale == Locale.en_US)
-                        {
-                            string[] splitDate = activity.Date.Split('/');
-                            string newDate = $"{splitDate[2]}-{splitDate[0]}-{splitDate[1]} {activity.Time.Replace(".", "")}";
-                            scanDate = Convert.ToDateTime(newDate);
-
-                        }
-                        else
-                        {
-                            string[] splitDate = activity.Date.Split('/');
-                            string newDate = $"{splitDate[2]}-{splitDate[1]}-{splitDate[0]} {activity.Time.Replace(".", "")}";
-                            scanDate = Convert.ToDateTime(newDate);
-                        }
+                        trackingModel.EstimateDelivery = estimatedArrival;
                     }
-                    trackingModel.TrackingDetails.Add(new TrackingDetails
+                    trackDetails.ShipmentProgressActivities.ForEach(activity =>
                     {
-                        Date = scanDate,
-                        Event = HttpUtility.HtmlDecode(activity.ActivityScan).Trim(),
-                        Messages = activity.Location
+                        DateTime? scanDate = null;
+                        if (activity.Date != null && activity.Time != null)
+                        {
+                            if (locale == Locale.en_US)
+                            {
+                                string[] splitDate = activity.Date.Split('/');
+                                string newDate = $"{splitDate[2]}-{splitDate[0]}-{splitDate[1]} {activity.Time.Replace(".", "")}";
+                                scanDate = Convert.ToDateTime(newDate);
+
+                            }
+                            else
+                            {
+                                string[] splitDate = activity.Date.Split('/');
+                                string newDate = $"{splitDate[2]}-{splitDate[1]}-{splitDate[0]} {activity.Time.Replace(".", "")}";
+                                scanDate = Convert.ToDateTime(newDate);
+                            }
+                        }
+                        trackingModel.TrackingDetails.Add(new TrackingDetails
+                        {
+                            Date = scanDate,
+                            Event = HttpUtility.HtmlDecode(activity.ActivityScan).Trim(),
+                            Messages = activity.Location
+                        });
                     });
-                });
+                }
             }
             return trackingModel;
         }

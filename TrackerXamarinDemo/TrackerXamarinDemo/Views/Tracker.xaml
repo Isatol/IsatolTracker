@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="TrackerXamarinDemo.Views.Tracker"
+             Title="{Binding Title}">
+    
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Command="{Binding NavigateToAddPackage}">
+            <ToolbarItem.IconImageSource>
+                <FontImageSource Glyph="&#xf067;" Size="20">
+                    <FontImageSource.FontFamily>
+                        <OnPlatform x:TypeArguments="x:String"
+                                        Android="Font Awesome 5 Free-Solid-900.otf#Font Awesome 5 Free Solid"
+                                        iOS="Font Awesome 5 Free" 
+                                        ></OnPlatform>
+                    </FontImageSource.FontFamily>
+                </FontImageSource>
+            </ToolbarItem.IconImageSource>
+        </ToolbarItem>
+    </ContentPage.ToolbarItems>
+    <ContentPage.Content>
+        <RefreshView  IsRefreshing="{Binding IsBusy, Mode=TwoWay}" x:Name="RefreshViewUserPackages" Command="{Binding LoadUserPackages}">
+            <ScrollView>
+                <CollectionView x:Name="PackagesCollectionView" ItemsSource="{Binding Packages}">
+                    <CollectionView.EmptyView>
+                        <Grid>
+                            <Label HorizontalOptions="Center" VerticalOptions="Center" Text="No hay datos para mostrar"></Label>
+                        </Grid>
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <StackLayout  VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
+                                <BoxView Color="Transparent" HeightRequest="5"></BoxView>
+                                <Frame  Padding="8" HorizontalOptions="Center" HasShadow="True" CornerRadius="5" IsClippedToBounds="True">
+                                    <Grid HeightRequest="140" WidthRequest="380">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width=".2*"></ColumnDefinition>
+                                            <ColumnDefinition Width=".7*"></ColumnDefinition>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height=".1*"></RowDefinition>
+                                            <RowDefinition Height=".5*"></RowDefinition>
+                                            <RowDefinition Height=".4*"></RowDefinition>
+                                        </Grid.RowDefinitions>
+                                        <Frame  Margin="5"
+                                            Grid.RowSpan="4"
+                                           BorderColor="Black"
+                                           CornerRadius="60"
+                                           HeightRequest="20"
+                                           WidthRequest="20"
+                                           IsClippedToBounds="True"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center">
+                                            <Image Aspect="AspectFill" Margin="-20" HeightRequest="200" WidthRequest="200"  Source="{Binding Path=ImageSource}" ></Image>
+                                        </Frame>
+                                        <Label Grid.Column="1" Grid.Row="1" FontAttributes="Bold" FontSize="Large" VerticalOptions="Center" Text="{Binding PackageName}"></Label>
+                                        <Label Grid.Row="2" Grid.Column="1" FontSize="Small" Text="{Binding Event}"></Label>
+                                        <Label Grid.Row="3" Grid.Column="1" FontSize="Small" Text="{Binding TrackingNumber}"></Label>
+                                    </Grid>
+                                    <Frame.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped_1" NumberOfTapsRequired="1"></TapGestureRecognizer>
+                                    </Frame.GestureRecognizers>
+                                </Frame>
+                            </StackLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </ScrollView>
+        </RefreshView>
+    </ContentPage.Content>
+</ContentPage>
